@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>SweepRSS</title>
+
+  <!-- White background -->
+  <rect width="512" height="512" fill="white"/>
+
+  <!-- RSS arcs (rendered behind broom body) -->
+  <!-- Arc center: (244, 248) — where handle meets broom head -->
+  <!-- Sweep from ~115° (lower-left) to ~-15° (upper-right), counterclockwise, 130° arc -->
+
+  <!-- Inner arc (r=68) -->
+  <path d="M 215,310 A 68 68 0 0 0 310,230"
+        stroke="#1B6E8E" stroke-width="30" stroke-linecap="round" fill="none"/>
+
+  <!-- Middle arc (r=110) -->
+  <path d="M 198,348 A 110 110 0 0 0 350,220"
+        stroke="#1B6E8E" stroke-width="30" stroke-linecap="round" fill="none"/>
+
+  <!-- Outer arc (r=152) -->
+  <path d="M 180,386 A 152 152 0 0 0 391,209"
+        stroke="#1B6E8E" stroke-width="30" stroke-linecap="round" fill="none"/>
+
+  <!-- Broom head body (fan/paddle shape, drawn over arcs) -->
+  <path d="
+    M 216,252
+    C 198,262 182,298 180,342
+    C 180,390 207,422 248,424
+    C 289,424 318,394 322,350
+    C 328,306 309,268 282,252
+    C 266,242 250,238 234,242
+    Z
+  " fill="#1B6E8E"/>
+
+  <!-- Bristle cuts at bottom of broom head (white) -->
+  <line x1="210" y1="408" x2="202" y2="432"
+        stroke="white" stroke-width="15" stroke-linecap="round"/>
+  <line x1="238" y1="419" x2="237" y2="443"
+        stroke="white" stroke-width="15" stroke-linecap="round"/>
+  <line x1="267" y1="416" x2="275" y2="439"
+        stroke="white" stroke-width="15" stroke-linecap="round"/>
+  <line x1="295" y1="404" x2="307" y2="424"
+        stroke="white" stroke-width="15" stroke-linecap="round"/>
+
+  <!-- Broom handle (rendered on top to cross over arcs) -->
+  <line x1="122" y1="80" x2="236" y2="250"
+        stroke="#1B6E8E" stroke-width="48" stroke-linecap="round"/>
+</svg>
