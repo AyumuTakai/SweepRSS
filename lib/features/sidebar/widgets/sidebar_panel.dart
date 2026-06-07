@@ -405,7 +405,7 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
 
 class _TrashFeedSidebarTile extends ConsumerWidget {
   final Feed feed;
-  const _TrashFeedSidebarTile({super.key, required this.feed});
+  const _TrashFeedSidebarTile({required this.feed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
