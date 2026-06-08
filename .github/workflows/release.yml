@@ -43,7 +43,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package DMG with Fastforge
-        run: dart pub global run fastforge release --name production --jobs release-macos-dmg
+        run: dart pub global run fastforge:main release --name production --jobs release-macos-dmg
         env:
           CODE_SIGN_IDENTITY: ""
           CODE_SIGNING_REQUIRED: "NO"
@@ -81,7 +81,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package EXE with Fastforge
-        run: dart pub global run fastforge release --name production --jobs release-windows-exe
+        run: dart pub global run fastforge:main release --name production --jobs release-windows-exe
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
@@ -128,7 +128,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package AppImage with Fastforge
-        run: dart pub global run fastforge release --name production --jobs release-linux-appimage
+        run: dart pub global run fastforge:main release --name production --jobs release-linux-appimage
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2

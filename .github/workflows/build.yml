@@ -39,7 +39,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package DMG with Fastforge
-        run: dart pub global run fastforge package --platform macos --targets dmg
+        run: dart pub global run fastforge:main package --platform macos --targets dmg
         env:
           CODE_SIGN_IDENTITY: ""
           CODE_SIGNING_REQUIRED: "NO"
@@ -81,7 +81,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package EXE with Fastforge
-        run: dart pub global run fastforge package --platform windows --targets exe
+        run: dart pub global run fastforge:main package --platform windows --targets exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -132,7 +132,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Package AppImage with Fastforge
-        run: dart pub global run fastforge package --platform linux --targets appimage
+        run: dart pub global run fastforge:main package --platform linux --targets appimage
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
