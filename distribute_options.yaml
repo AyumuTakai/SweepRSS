@@ -9,10 +9,10 @@ releases:
           target: dmg
 
       # ── Windows ────────────────────────────────────────────────────────────
-      - name: release-windows-msix
+      - name: release-windows-exe
         package:
           platform: windows
-          target: msix
+          target: exe
 
       # ── Linux ──────────────────────────────────────────────────────────────
       - name: release-linux-appimage

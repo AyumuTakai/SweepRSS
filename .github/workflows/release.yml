@@ -52,12 +52,15 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: dist/**/*.dmg
 
-  # ── Windows → MSIX ───────────────────────────────────────────────────────
+  # ── Windows → EXE (NSIS) ─────────────────────────────────────────────────
   build-windows:
-    name: Build (Windows MSIX)
+    name: Build (Windows EXE)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install NSIS
+        run: choco install nsis -y
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -71,14 +74,14 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build MSIX
-        run: flutter_distributor package --platform windows --targets msix
+      - name: Build EXE
+        run: flutter_distributor package --platform windows --targets exe
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          files: dist/**/*.msix
+          files: dist/**/*.exe
 
   # ── Linux → AppImage ─────────────────────────────────────────────────────
   build-linux:

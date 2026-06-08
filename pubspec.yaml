@@ -54,19 +54,6 @@ dev_dependencies:
   riverpod_generator: ^2.6.3
   custom_lint: ^0.7.5
   riverpod_lint: ^2.6.3
-  msix: ^3.16.7
-
 flutter:
   uses-material-design: true
   generate: true
-
-msix_config:
-  display_name: SweepRSS
-  publisher_display_name: SweepRSS
-  identity_name: com.sweepRSS.app
-  publisher: CN=SweepRSS
-  msix_version: 0.3.0.0
-  logo_path: windows\runner\resources\app_icon.ico
-  sign_msix: false
-  install_certificate: false
-  capabilities: internetClient
