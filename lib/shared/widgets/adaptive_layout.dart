@@ -40,14 +40,19 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   // ── キーボードハンドラー ────────────────────────────────────────────────────
 
   bool _handleKeyEvent(KeyEvent event) {
-    if (event is! KeyDownEvent) return false;
     // テキスト入力中は横取りしない
     if (_isTextInputFocused) return false;
 
+    // スペースキーは長押し（KeyRepeatEvent）でも連続スクロールさせる。
+    // 矢印キーは KeyDownEvent のみ処理（記事を高速で連続送りしない）。
     if (event.logicalKey == LogicalKeyboardKey.space) {
+      if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
       _handleSpace();
       return true;
     }
+
+    if (event is! KeyDownEvent) return false;
+
     if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
       _handleArrowDown();
       return true;

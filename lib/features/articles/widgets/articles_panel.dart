@@ -57,12 +57,25 @@ class ArticlesPanel extends ConsumerWidget {
 
 // ── 記事ツールバー ─────────────────────────────────────────────────────────────
 
-class _ArticlesToolbar extends ConsumerWidget {
+class _ArticlesToolbar extends ConsumerStatefulWidget {
   final String query;
   const _ArticlesToolbar({required this.query});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_ArticlesToolbar> createState() => _ArticlesToolbarState();
+}
+
+class _ArticlesToolbarState extends ConsumerState<_ArticlesToolbar> {
+  late final FocusNode _focusNode = FocusNode(skipTraversal: true);
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 40,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -71,6 +84,7 @@ class _ArticlesToolbar extends ConsumerWidget {
         children: [
           Expanded(
             child: TextField(
+              focusNode: _focusNode,
               autofocus: false,
               decoration: const InputDecoration(
                 hintText: '記事を検索...',
@@ -81,6 +95,7 @@ class _ArticlesToolbar extends ConsumerWidget {
               style: const TextStyle(fontSize: 13),
               onChanged: (v) =>
                   ref.read(searchQueryProvider.notifier).state = v,
+              onTapOutside: (_) => _focusNode.unfocus(),
             ),
           ),
         ],
@@ -174,7 +189,7 @@ class _ArticleTile extends StatelessWidget {
               ),
             Expanded(
               child: Text(
-                entry.title ?? '(タイトルなし)',
+                (entry.title ?? '(タイトルなし)').replaceAll(RegExp(r'[\r\n]+'), ' '),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight:

@@ -11,7 +11,9 @@ import '../../../shared/providers/selection_provider.dart';
 import '../../../shared/widgets/toast_overlay.dart';
 import '../../dialogs/add_feed_dialog.dart';
 import '../../dialogs/folder_manager_dialog.dart';
+import '../../articles/providers/articles_provider.dart';
 import '../../opml/opml_import_provider.dart';
+import '../../../shared/providers/unread_snapshot_provider.dart';
 import 'folder_tile.dart';
 import 'feed_tile.dart';
 import 'space_switcher.dart';
@@ -44,6 +46,7 @@ class SidebarPanel extends ConsumerWidget {
                     icon: Icons.all_inbox,
                     label: 'すべて',
                     selected: selection is SelectionAll,
+                    unreadCount: ref.watch(totalUnreadCountProvider).valueOrNull,
                     onTap: () => ref.read(selectionProvider.notifier).state =
                         const SelectionAll(),
                   ),
@@ -51,8 +54,12 @@ class SidebarPanel extends ConsumerWidget {
                     icon: Icons.mark_email_unread,
                     label: '未読',
                     selected: selection is SelectionUnread,
-                    onTap: () => ref.read(selectionProvider.notifier).state =
-                        const SelectionUnread(),
+                    onTap: () {
+                      ref.read(selectionProvider.notifier).state =
+                          const SelectionUnread();
+                      // スナップショットを初期化（すでに初期化済みなら何もしない）
+                      ref.read(unreadSnapshotProvider.notifier).initialize();
+                    },
                   ),
                   _NavItem(
                     icon: Icons.bookmark,
@@ -180,13 +187,9 @@ class _ImportProgressBar extends ConsumerWidget {
   }
 }
 
-class _SidebarFooter extends ConsumerWidget {
+class _SidebarFooter extends StatelessWidget {
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isImporting = ref.watch(
-      opmlImportProvider.select((s) => s.isRunning),
-    );
-
+  Widget build(BuildContext context) {
     return Container(
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -207,13 +210,6 @@ class _SidebarFooter extends ConsumerWidget {
               context: context,
               builder: (_) => const FolderManagerDialog(),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.upload_file, size: 18),
-            tooltip: 'OPML をインポート',
-            onPressed: isImporting
-                ? null
-                : () => ref.read(opmlImportProvider.notifier).startImport(),
           ),
         ],
       ),
@@ -519,6 +515,7 @@ class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool selected;
+  final int? unreadCount;
   final VoidCallback onTap;
 
   const _NavItem({
@@ -526,6 +523,7 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.unreadCount,
   });
 
   @override
@@ -534,6 +532,22 @@ class _NavItem extends StatelessWidget {
       dense: true,
       leading: Icon(icon, size: 16),
       title: Text(label, style: const TextStyle(fontSize: 13)),
+      trailing: (unreadCount != null && unreadCount! > 0)
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$unreadCount',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 10,
+                ),
+              ),
+            )
+          : null,
       selected: selected,
       selectedTileColor: Theme.of(context).colorScheme.primaryContainer,
       onTap: onTap,

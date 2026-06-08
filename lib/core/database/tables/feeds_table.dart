@@ -13,6 +13,8 @@ class Feeds extends Table {
   BoolColumn get requiresExternalBrowser =>
       boolean().withDefault(const Constant(false))();
   TextColumn get spaceId => text().nullable()();
+  TextColumn get lastFetchError => text().nullable()();
+  DateTimeColumn get lastFetchAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -74,8 +74,11 @@ class RssService {
 
   Future<({int newCount, String? error})> refreshFeed(Feed feed) async {
     try {
-      final error = UrlValidator.validate(feed.url);
-      if (error != null) return (newCount: 0, error: error);
+      final validationError = UrlValidator.validate(feed.url);
+      if (validationError != null) {
+        await _db.feedsDao.updateFetchStatus(feed.id, error: validationError);
+        return (newCount: 0, error: validationError);
+      }
 
       final response = await _dio.get<String>(
         feed.url,
@@ -84,11 +87,16 @@ class RssService {
       final body = response.data ?? '';
       final parsed = _parseFeed(body);
       final newCount = await _saveEntries(feed.id, parsed);
+      await _db.feedsDao.updateFetchStatus(feed.id);
       return (newCount: newCount, error: null);
     } on DioException catch (e) {
-      return (newCount: 0, error: _formatDioError(e));
+      final msg = _formatDioError(e);
+      await _db.feedsDao.updateFetchStatus(feed.id, error: msg);
+      return (newCount: 0, error: msg);
     } catch (e) {
-      return (newCount: 0, error: e.toString());
+      final msg = e.toString();
+      await _db.feedsDao.updateFetchStatus(feed.id, error: msg);
+      return (newCount: 0, error: msg);
     }
   }
 

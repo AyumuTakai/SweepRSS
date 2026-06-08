@@ -22,15 +22,24 @@ class FeedTile extends ConsumerWidget {
     // unreadCount は feed ごとに独立して変化するため、ここで watch するのが適切
     final unreadAsync = ref.watch(unreadCountProvider(feed.id));
 
+    final hasFetchError = feed.lastFetchError != null;
+    final dimColor = Theme.of(context).disabledColor;
+
     final tile = GestureDetector(
       onSecondaryTapDown: (details) =>
           _showContextMenu(context, ref, details.globalPosition),
-      child: ListTile(
+      child: Tooltip(
+        message: hasFetchError ? '取得エラー: ${feed.lastFetchError}' : '',
+        child: ListTile(
         dense: true,
-        leading: const Icon(Icons.rss_feed, size: 14),
+        leading: Icon(Icons.rss_feed, size: 14,
+            color: hasFetchError ? dimColor : null),
         title: Text(
           feed.title ?? feed.url,
-          style: const TextStyle(fontSize: 12),
+          style: TextStyle(
+            fontSize: 12,
+            color: hasFetchError ? dimColor : null,
+          ),
           overflow: TextOverflow.ellipsis,
         ),
         trailing: unreadAsync.when(
@@ -60,6 +69,7 @@ class FeedTile extends ConsumerWidget {
           ref.read(selectionProvider.notifier).state = SelectionFeed(feed.id);
           ref.read(currentArticleIdProvider.notifier).state = null;
         },
+        ),
       ),
     );
 
@@ -119,6 +129,7 @@ class FeedTile extends ConsumerWidget {
                 .read(databaseProvider)
                 .entriesDao
                 .markAllReadForFeed(feed.id);
+            ref.invalidate(articlesProvider);
           },
         ),
         PopupMenuItem(

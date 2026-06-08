@@ -125,6 +125,28 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lastFetchErrorMeta = const VerificationMeta(
+    'lastFetchError',
+  );
+  @override
+  late final GeneratedColumn<String> lastFetchError = GeneratedColumn<String>(
+    'last_fetch_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastFetchAtMeta = const VerificationMeta(
+    'lastFetchAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastFetchAt = GeneratedColumn<DateTime>(
+    'last_fetch_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -138,6 +160,8 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
     folderId,
     requiresExternalBrowser,
     spaceId,
+    lastFetchError,
+    lastFetchAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -224,6 +248,24 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
         spaceId.isAcceptableOrUnknown(data['space_id']!, _spaceIdMeta),
       );
     }
+    if (data.containsKey('last_fetch_error')) {
+      context.handle(
+        _lastFetchErrorMeta,
+        lastFetchError.isAcceptableOrUnknown(
+          data['last_fetch_error']!,
+          _lastFetchErrorMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_fetch_at')) {
+      context.handle(
+        _lastFetchAtMeta,
+        lastFetchAt.isAcceptableOrUnknown(
+          data['last_fetch_at']!,
+          _lastFetchAtMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -277,6 +319,14 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
         DriftSqlType.string,
         data['${effectivePrefix}space_id'],
       ),
+      lastFetchError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_fetch_error'],
+      ),
+      lastFetchAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_fetch_at'],
+      ),
     );
   }
 
@@ -298,6 +348,8 @@ class Feed extends DataClass implements Insertable<Feed> {
   final String? folderId;
   final bool requiresExternalBrowser;
   final String? spaceId;
+  final String? lastFetchError;
+  final DateTime? lastFetchAt;
   const Feed({
     required this.id,
     required this.url,
@@ -310,6 +362,8 @@ class Feed extends DataClass implements Insertable<Feed> {
     this.folderId,
     required this.requiresExternalBrowser,
     this.spaceId,
+    this.lastFetchError,
+    this.lastFetchAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -341,6 +395,12 @@ class Feed extends DataClass implements Insertable<Feed> {
     if (!nullToAbsent || spaceId != null) {
       map['space_id'] = Variable<String>(spaceId);
     }
+    if (!nullToAbsent || lastFetchError != null) {
+      map['last_fetch_error'] = Variable<String>(lastFetchError);
+    }
+    if (!nullToAbsent || lastFetchAt != null) {
+      map['last_fetch_at'] = Variable<DateTime>(lastFetchAt);
+    }
     return map;
   }
 
@@ -371,6 +431,12 @@ class Feed extends DataClass implements Insertable<Feed> {
       spaceId: spaceId == null && nullToAbsent
           ? const Value.absent()
           : Value(spaceId),
+      lastFetchError: lastFetchError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastFetchError),
+      lastFetchAt: lastFetchAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastFetchAt),
     );
   }
 
@@ -393,6 +459,8 @@ class Feed extends DataClass implements Insertable<Feed> {
         json['requiresExternalBrowser'],
       ),
       spaceId: serializer.fromJson<String?>(json['spaceId']),
+      lastFetchError: serializer.fromJson<String?>(json['lastFetchError']),
+      lastFetchAt: serializer.fromJson<DateTime?>(json['lastFetchAt']),
     );
   }
   @override
@@ -412,6 +480,8 @@ class Feed extends DataClass implements Insertable<Feed> {
         requiresExternalBrowser,
       ),
       'spaceId': serializer.toJson<String?>(spaceId),
+      'lastFetchError': serializer.toJson<String?>(lastFetchError),
+      'lastFetchAt': serializer.toJson<DateTime?>(lastFetchAt),
     };
   }
 
@@ -427,6 +497,8 @@ class Feed extends DataClass implements Insertable<Feed> {
     Value<String?> folderId = const Value.absent(),
     bool? requiresExternalBrowser,
     Value<String?> spaceId = const Value.absent(),
+    Value<String?> lastFetchError = const Value.absent(),
+    Value<DateTime?> lastFetchAt = const Value.absent(),
   }) => Feed(
     id: id ?? this.id,
     url: url ?? this.url,
@@ -440,6 +512,10 @@ class Feed extends DataClass implements Insertable<Feed> {
     requiresExternalBrowser:
         requiresExternalBrowser ?? this.requiresExternalBrowser,
     spaceId: spaceId.present ? spaceId.value : this.spaceId,
+    lastFetchError: lastFetchError.present
+        ? lastFetchError.value
+        : this.lastFetchError,
+    lastFetchAt: lastFetchAt.present ? lastFetchAt.value : this.lastFetchAt,
   );
   Feed copyWithCompanion(FeedsCompanion data) {
     return Feed(
@@ -458,6 +534,12 @@ class Feed extends DataClass implements Insertable<Feed> {
           ? data.requiresExternalBrowser.value
           : this.requiresExternalBrowser,
       spaceId: data.spaceId.present ? data.spaceId.value : this.spaceId,
+      lastFetchError: data.lastFetchError.present
+          ? data.lastFetchError.value
+          : this.lastFetchError,
+      lastFetchAt: data.lastFetchAt.present
+          ? data.lastFetchAt.value
+          : this.lastFetchAt,
     );
   }
 
@@ -474,7 +556,9 @@ class Feed extends DataClass implements Insertable<Feed> {
           ..write('deletedAt: $deletedAt, ')
           ..write('folderId: $folderId, ')
           ..write('requiresExternalBrowser: $requiresExternalBrowser, ')
-          ..write('spaceId: $spaceId')
+          ..write('spaceId: $spaceId, ')
+          ..write('lastFetchError: $lastFetchError, ')
+          ..write('lastFetchAt: $lastFetchAt')
           ..write(')'))
         .toString();
   }
@@ -492,6 +576,8 @@ class Feed extends DataClass implements Insertable<Feed> {
     folderId,
     requiresExternalBrowser,
     spaceId,
+    lastFetchError,
+    lastFetchAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -507,7 +593,9 @@ class Feed extends DataClass implements Insertable<Feed> {
           other.deletedAt == this.deletedAt &&
           other.folderId == this.folderId &&
           other.requiresExternalBrowser == this.requiresExternalBrowser &&
-          other.spaceId == this.spaceId);
+          other.spaceId == this.spaceId &&
+          other.lastFetchError == this.lastFetchError &&
+          other.lastFetchAt == this.lastFetchAt);
 }
 
 class FeedsCompanion extends UpdateCompanion<Feed> {
@@ -522,6 +610,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
   final Value<String?> folderId;
   final Value<bool> requiresExternalBrowser;
   final Value<String?> spaceId;
+  final Value<String?> lastFetchError;
+  final Value<DateTime?> lastFetchAt;
   final Value<int> rowid;
   const FeedsCompanion({
     this.id = const Value.absent(),
@@ -535,6 +625,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     this.folderId = const Value.absent(),
     this.requiresExternalBrowser = const Value.absent(),
     this.spaceId = const Value.absent(),
+    this.lastFetchError = const Value.absent(),
+    this.lastFetchAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FeedsCompanion.insert({
@@ -549,6 +641,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     this.folderId = const Value.absent(),
     this.requiresExternalBrowser = const Value.absent(),
     this.spaceId = const Value.absent(),
+    this.lastFetchError = const Value.absent(),
+    this.lastFetchAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        url = Value(url);
@@ -564,6 +658,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     Expression<String>? folderId,
     Expression<bool>? requiresExternalBrowser,
     Expression<String>? spaceId,
+    Expression<String>? lastFetchError,
+    Expression<DateTime>? lastFetchAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -579,6 +675,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
       if (requiresExternalBrowser != null)
         'requires_external_browser': requiresExternalBrowser,
       if (spaceId != null) 'space_id': spaceId,
+      if (lastFetchError != null) 'last_fetch_error': lastFetchError,
+      if (lastFetchAt != null) 'last_fetch_at': lastFetchAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -595,6 +693,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     Value<String?>? folderId,
     Value<bool>? requiresExternalBrowser,
     Value<String?>? spaceId,
+    Value<String?>? lastFetchError,
+    Value<DateTime?>? lastFetchAt,
     Value<int>? rowid,
   }) {
     return FeedsCompanion(
@@ -610,6 +710,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
       requiresExternalBrowser:
           requiresExternalBrowser ?? this.requiresExternalBrowser,
       spaceId: spaceId ?? this.spaceId,
+      lastFetchError: lastFetchError ?? this.lastFetchError,
+      lastFetchAt: lastFetchAt ?? this.lastFetchAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -652,6 +754,12 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     if (spaceId.present) {
       map['space_id'] = Variable<String>(spaceId.value);
     }
+    if (lastFetchError.present) {
+      map['last_fetch_error'] = Variable<String>(lastFetchError.value);
+    }
+    if (lastFetchAt.present) {
+      map['last_fetch_at'] = Variable<DateTime>(lastFetchAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -672,6 +780,8 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
           ..write('folderId: $folderId, ')
           ..write('requiresExternalBrowser: $requiresExternalBrowser, ')
           ..write('spaceId: $spaceId, ')
+          ..write('lastFetchError: $lastFetchError, ')
+          ..write('lastFetchAt: $lastFetchAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1911,6 +2021,8 @@ typedef $$FeedsTableCreateCompanionBuilder =
       Value<String?> folderId,
       Value<bool> requiresExternalBrowser,
       Value<String?> spaceId,
+      Value<String?> lastFetchError,
+      Value<DateTime?> lastFetchAt,
       Value<int> rowid,
     });
 typedef $$FeedsTableUpdateCompanionBuilder =
@@ -1926,6 +2038,8 @@ typedef $$FeedsTableUpdateCompanionBuilder =
       Value<String?> folderId,
       Value<bool> requiresExternalBrowser,
       Value<String?> spaceId,
+      Value<String?> lastFetchError,
+      Value<DateTime?> lastFetchAt,
       Value<int> rowid,
     });
 
@@ -1989,6 +2103,16 @@ class $$FeedsTableFilterComposer extends Composer<_$AppDatabase, $FeedsTable> {
 
   ColumnFilters<String> get spaceId => $composableBuilder(
     column: $table.spaceId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastFetchError => $composableBuilder(
+    column: $table.lastFetchError,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastFetchAt => $composableBuilder(
+    column: $table.lastFetchAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2056,6 +2180,16 @@ class $$FeedsTableOrderingComposer
     column: $table.spaceId,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get lastFetchError => $composableBuilder(
+    column: $table.lastFetchError,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastFetchAt => $composableBuilder(
+    column: $table.lastFetchAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FeedsTableAnnotationComposer
@@ -2103,6 +2237,16 @@ class $$FeedsTableAnnotationComposer
 
   GeneratedColumn<String> get spaceId =>
       $composableBuilder(column: $table.spaceId, builder: (column) => column);
+
+  GeneratedColumn<String> get lastFetchError => $composableBuilder(
+    column: $table.lastFetchError,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastFetchAt => $composableBuilder(
+    column: $table.lastFetchAt,
+    builder: (column) => column,
+  );
 }
 
 class $$FeedsTableTableManager
@@ -2144,6 +2288,8 @@ class $$FeedsTableTableManager
                 Value<String?> folderId = const Value.absent(),
                 Value<bool> requiresExternalBrowser = const Value.absent(),
                 Value<String?> spaceId = const Value.absent(),
+                Value<String?> lastFetchError = const Value.absent(),
+                Value<DateTime?> lastFetchAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FeedsCompanion(
                 id: id,
@@ -2157,6 +2303,8 @@ class $$FeedsTableTableManager
                 folderId: folderId,
                 requiresExternalBrowser: requiresExternalBrowser,
                 spaceId: spaceId,
+                lastFetchError: lastFetchError,
+                lastFetchAt: lastFetchAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2172,6 +2320,8 @@ class $$FeedsTableTableManager
                 Value<String?> folderId = const Value.absent(),
                 Value<bool> requiresExternalBrowser = const Value.absent(),
                 Value<String?> spaceId = const Value.absent(),
+                Value<String?> lastFetchError = const Value.absent(),
+                Value<DateTime?> lastFetchAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FeedsCompanion.insert(
                 id: id,
@@ -2185,6 +2335,8 @@ class $$FeedsTableTableManager
                 folderId: folderId,
                 requiresExternalBrowser: requiresExternalBrowser,
                 spaceId: spaceId,
+                lastFetchError: lastFetchError,
+                lastFetchAt: lastFetchAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

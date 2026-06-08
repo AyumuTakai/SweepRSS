@@ -78,6 +78,15 @@ class FeedsDao extends DatabaseAccessor<AppDatabase> with _$FeedsDaoMixin {
     );
   }
 
+  Future<void> updateFetchStatus(String id, {String? error}) {
+    return (update(feeds)..where((f) => f.id.equals(id))).write(
+      FeedsCompanion(
+        lastFetchError: Value(error),
+        lastFetchAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   /// 起動時チェック: 参照先フォルダが存在しない幽霊フィードを未分類へ移動する
   Future<void> fixOrphanedFeeds() {
     return customUpdate(

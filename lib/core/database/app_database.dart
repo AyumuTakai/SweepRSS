@@ -23,7 +23,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,10 @@ class AppDatabase extends _$AppDatabase {
               variables: [Variable.withString(defaultId)],
               updates: {feeds},
             );
+          }
+          if (from < 3) {
+            await m.addColumn(feeds, feeds.lastFetchError);
+            await m.addColumn(feeds, feeds.lastFetchAt);
           }
         },
         beforeOpen: (details) async {

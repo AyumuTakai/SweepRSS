@@ -4,8 +4,9 @@ import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
 import '../../../shared/providers/active_space_provider.dart';
 import '../../../shared/providers/database_provider.dart';
-import '../../../shared/providers/selection_provider.dart';
 import '../../../shared/providers/refresh_provider.dart';
+import '../../../shared/providers/selection_provider.dart';
+import '../../../shared/providers/unread_snapshot_provider.dart';
 
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
@@ -29,18 +30,13 @@ final articlesProvider = FutureProvider<List<Entry>>((ref) async {
       }
 
     case SelectionUnread():
-      if (activeSpace != null) {
-        final feedIds = await _feedIdsInSpace(db, activeSpace.id);
-        if (feedIds.isEmpty) {
-          entries = [];
-        } else {
-          final all = await db.entriesDao.getEntriesForFeeds(feedIds);
-          entries = all.where((e) => e.unread).toList();
-        }
-      } else {
-        final all = await db.entriesDao.getAllEntries();
-        entries = all.where((e) => e.unread).toList();
-      }
+      // スナップショットが初期化されていればそのIDセットで取得。
+      // 既読化された記事もIDがセットに残るためリストから消えない。
+      // 初期化前（null）は空を返し、initialize() 完了後に自動再描画される。
+      final snapshot = ref.watch(unreadSnapshotProvider);
+      entries = snapshot == null || snapshot.isEmpty
+          ? []
+          : await db.entriesDao.getEntriesForIds(snapshot.toList());
 
     case SelectionFlagged():
       if (activeSpace != null) {
@@ -110,8 +106,33 @@ final currentArticleFeedProvider = FutureProvider<Feed?>((ref) async {
 });
 
 final unreadCountProvider =
-    FutureProvider.family<int, String>((ref, feedId) async {
-  ref.watch(feedsStreamProvider);
+    StreamProvider.family<int, String>((ref, feedId) {
+  return ref.watch(databaseProvider).entriesDao.watchUnreadCountForFeed(feedId);
+});
+
+/// 現在のスペースにおける未読件数合計。
+/// スペース切り替え・既読化・フィード追加削除に追従してリアクティブに更新される。
+final totalUnreadCountProvider = StreamProvider<int>((ref) {
   final db = ref.watch(databaseProvider);
-  return db.entriesDao.getUnreadCountForFeed(feedId);
+  final activeSpace = ref.watch(resolvedActiveSpaceProvider);
+  final feeds = ref.watch(feedsStreamProvider).valueOrNull ?? [];
+  final folders = (activeSpace != null
+          ? ref.watch(spaceFoldersStreamProvider(activeSpace.id))
+          : ref.watch(foldersStreamProvider))
+      .valueOrNull ?? [];
+
+  final List<String> feedIds;
+  if (activeSpace != null) {
+    final spaceFolderIds = folders.map((f) => f.id).toSet();
+    feedIds = feeds
+        .where((f) =>
+            (f.folderId != null && spaceFolderIds.contains(f.folderId)) ||
+            (f.folderId == null && f.spaceId == activeSpace.id))
+        .map((f) => f.id)
+        .toList();
+  } else {
+    feedIds = feeds.map((f) => f.id).toList();
+  }
+
+  return db.entriesDao.watchTotalUnreadCountForFeeds(feedIds);
 });
