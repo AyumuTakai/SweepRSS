@@ -37,7 +37,11 @@ class FolderExpandedNotifier extends AsyncNotifier<Map<String, bool>> {
   /// フォルダの展開状態を切り替える。
   /// in-memory 更新は同期的。ファイル書き込みは fire-and-forget。
   void toggle(String folderId) {
-    final current = state.valueOrNull ?? {};
+    final current = state.when(
+      data: (data) => data,
+      loading: () => {},
+      error: (_, __) => {},
+    );
     final next = !(current[folderId] ?? true);
     state = AsyncData({...current, folderId: next});
     _persist({...current, folderId: next});

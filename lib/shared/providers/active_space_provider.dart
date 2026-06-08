@@ -64,8 +64,18 @@ class ActiveSpaceNotifier extends AsyncNotifier<String?> {
 /// スペースが削除されていた場合はリストの先頭スペースへフォールバック。
 /// スペースがひとつも存在しない場合は null（全表示モード）を返す。
 final resolvedActiveSpaceProvider = Provider<Space?>((ref) {
-  final activeId = ref.watch(activeSpaceProvider).valueOrNull;
-  final spaces = ref.watch(spacesStreamProvider).valueOrNull ?? [];
+  final activeIdAsync = ref.watch(activeSpaceProvider);
+  final activeId = activeIdAsync.when(
+    data: (data) => data,
+    loading: () => null,
+    error: (_, __) => null,
+  );
+  final spacesAsync = ref.watch(spacesStreamProvider);
+  final spaces = spacesAsync.when(
+    data: (data) => data,
+    loading: () => [],
+    error: (_, __) => [],
+  );
   if (spaces.isEmpty) return null;
   return spaces.firstWhere(
     (s) => s.id == activeId,

@@ -31,8 +31,11 @@ class ReaderPanel extends ConsumerWidget {
           );
         }
 
-        final requiresExternal =
-            feedAsync.valueOrNull?.requiresExternalBrowser ?? false;
+        final requiresExternal = feedAsync.when(
+          data: (feed) => feed?.requiresExternalBrowser ?? false,
+          loading: () => false,
+          error: (_, __) => false,
+        );
 
         return Column(
           children: [

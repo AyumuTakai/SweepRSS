@@ -141,7 +141,12 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   // ── ↑キー: 前の記事 ────────────────────────────────────────────────────────
 
   void _handleArrowUp() {
-    final articles = ref.read(articlesProvider).valueOrNull;
+    final articlesAsync = ref.read(articlesProvider);
+    final articles = articlesAsync.when(
+      data: (data) => data,
+      loading: () => null,
+      error: (_, __) => null,
+    );
     if (articles == null || articles.isEmpty) return;
 
     final currentId = ref.read(currentArticleIdProvider);
@@ -156,7 +161,12 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   // ── 次の未読記事を選択 ─────────────────────────────────────────────────────
 
   void _selectNextUnread() {
-    final articles = ref.read(articlesProvider).valueOrNull;
+    final articlesAsync = ref.read(articlesProvider);
+    final articles = articlesAsync.when(
+      data: (data) => data,
+      loading: () => null,
+      error: (_, __) => null,
+    );
     if (articles == null || articles.isEmpty) return;
 
     final currentId = ref.read(currentArticleIdProvider);

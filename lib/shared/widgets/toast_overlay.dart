@@ -11,12 +11,9 @@ class ToastMessage {
       : createdAt = DateTime.now();
 }
 
-final toastProvider = StateNotifierProvider<ToastNotifier, List<ToastMessage>>(
-  (_) => ToastNotifier(),
-);
-
-class ToastNotifier extends StateNotifier<List<ToastMessage>> {
-  ToastNotifier() : super([]);
+class ToastNotifier extends Notifier<List<ToastMessage>> {
+  @override
+  List<ToastMessage> build() => [];
 
   void show(String text, {bool isError = false}) {
     final msg = ToastMessage(text: text, isError: isError);
@@ -28,6 +25,10 @@ class ToastNotifier extends StateNotifier<List<ToastMessage>> {
 
   void showError(String text) => show(text, isError: true);
 }
+
+final toastProvider = NotifierProvider<ToastNotifier, List<ToastMessage>>(
+  ToastNotifier.new,
+);
 
 class ToastOverlay extends ConsumerWidget {
   final Widget child;

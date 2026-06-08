@@ -16,7 +16,7 @@ final articlesProvider = FutureProvider<List<Entry>>((ref) async {
   final query = ref.watch(searchQueryProvider).toLowerCase();
   final activeSpace = ref.watch(resolvedActiveSpaceProvider);
 
-  List<Entry> entries;
+  List<Entry> entries = [];
 
   switch (selection) {
     case SelectionAll():
@@ -100,7 +100,12 @@ final currentArticleProvider = StreamProvider<Entry?>((ref) {
 
 // 選択中記事のフィード情報（requiresExternalBrowser 判定に使用）
 final currentArticleFeedProvider = FutureProvider<Feed?>((ref) async {
-  final article = ref.watch(currentArticleProvider).valueOrNull;
+  final articleAsync = ref.watch(currentArticleProvider);
+  final article = articleAsync.when(
+    data: (data) => data,
+    loading: () => null,
+    error: (_, __) => null,
+  );
   if (article == null) return null;
   return ref.read(databaseProvider).feedsDao.getFeedById(article.feedId);
 });
@@ -115,11 +120,20 @@ final unreadCountProvider =
 final totalUnreadCountProvider = StreamProvider<int>((ref) {
   final db = ref.watch(databaseProvider);
   final activeSpace = ref.watch(resolvedActiveSpaceProvider);
-  final feeds = ref.watch(feedsStreamProvider).valueOrNull ?? [];
-  final folders = (activeSpace != null
+  final feedsAsync = ref.watch(feedsStreamProvider);
+  final feeds = feedsAsync.when(
+    data: (data) => data,
+    loading: () => [],
+    error: (_, __) => [],
+  );
+  final foldersAsync = (activeSpace != null
           ? ref.watch(spaceFoldersStreamProvider(activeSpace.id))
-          : ref.watch(foldersStreamProvider))
-      .valueOrNull ?? [];
+          : ref.watch(foldersStreamProvider));
+  final folders = foldersAsync.when(
+    data: (data) => data,
+    loading: () => [],
+    error: (_, __) => [],
+  );
 
   final List<String> feedIds;
   if (activeSpace != null) {
@@ -129,9 +143,10 @@ final totalUnreadCountProvider = StreamProvider<int>((ref) {
             (f.folderId != null && spaceFolderIds.contains(f.folderId)) ||
             (f.folderId == null && f.spaceId == activeSpace.id))
         .map((f) => f.id)
+        .cast<String>()
         .toList();
   } else {
-    feedIds = feeds.map((f) => f.id).toList();
+    feedIds = feeds.map((f) => f.id).cast<String>().toList();
   }
 
   return db.entriesDao.watchTotalUnreadCountForFeeds(feedIds);

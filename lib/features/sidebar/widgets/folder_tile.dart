@@ -54,7 +54,12 @@ class FolderTile extends ConsumerWidget {
     // unreadCount は feed ごとに独立して変化するため、ここで watch するのが適切
     final feedsInSubtree = _feedsInSubtree(folder.id);
     final totalUnread = feedsInSubtree.fold<int>(0, (sum, feed) {
-      final count = ref.watch(unreadCountProvider(feed.id)).valueOrNull ?? 0;
+      final countAsync = ref.watch(unreadCountProvider(feed.id));
+      final count = countAsync.when(
+        data: (data) => data,
+        loading: () => 0,
+        error: (_, __) => 0,
+      );
       return sum + count;
     });
 

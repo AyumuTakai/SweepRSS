@@ -12,7 +12,12 @@ class SpaceSwitcher extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final spaces = ref.watch(spacesStreamProvider).valueOrNull ?? [];
+    final spacesAsync = ref.watch(spacesStreamProvider);
+    final spaces = spacesAsync.when(
+      data: (data) => data,
+      loading: () => [],
+      error: (_, __) => [],
+    );
     final activeSpace = ref.watch(resolvedActiveSpaceProvider);
 
     if (spaces.isEmpty) return const SizedBox.shrink();

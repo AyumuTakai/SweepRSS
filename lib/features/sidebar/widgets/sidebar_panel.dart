@@ -47,7 +47,11 @@ class SidebarPanel extends ConsumerWidget {
                     icon: Icons.all_inbox,
                     label: AppLocalizations.of(context).navAll,
                     selected: selection is SelectionAll,
-                    unreadCount: ref.watch(totalUnreadCountProvider).valueOrNull,
+                    unreadCount: ref.watch(totalUnreadCountProvider).when(
+                      data: (data) => data,
+                      loading: () => null,
+                      error: (_, __) => null,
+                    ),
                     onTap: () => ref.read(selectionProvider.notifier).state =
                         const SelectionAll(),
                   ),
@@ -258,7 +262,11 @@ class _SidebarItemList extends ConsumerWidget {
     }
 
     final expandedMap =
-        ref.watch(folderExpandedProvider).valueOrNull ?? const {};
+        (ref.watch(folderExpandedProvider).when(
+          data: (data) => data,
+          loading: () => const {},
+          error: (_, __) => const {},
+        ) as Map<String, bool>);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -371,7 +379,11 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
     final selection = ref.watch(selectionProvider);
     final isSelected = selection is SelectionTrash;
     final feedsAsync = ref.watch(trashedFeedsStreamProvider);
-    final feeds = feedsAsync.valueOrNull ?? [];
+    final feeds = feedsAsync.when(
+      data: (data) => data,
+      loading: () => [],
+      error: (_, __) => [],
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
