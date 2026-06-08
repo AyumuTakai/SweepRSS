@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/reader_controller_provider.dart';
 import '../../../shared/providers/selection_provider.dart';
@@ -22,11 +23,11 @@ class ArticlesPanel extends ConsumerWidget {
 
     // ゴミ箱選択時はガイドを表示
     if (selection is SelectionTrash) {
-      return const Center(
+      return Center(
         child: Text(
-          'ゴミ箱のフィードはサイドバーで\n右クリックして操作できます',
+          AppLocalizations.of(context).articleTrashGuide,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey),
+          style: const TextStyle(color: Colors.grey),
         ),
       );
     }
@@ -41,13 +42,17 @@ class ArticlesPanel extends ConsumerWidget {
         Expanded(
           child: articlesAsync.when(
             data: (articles) => articles.isEmpty
-                ? const Center(child: Text('記事がありません'))
+                ? Center(
+                    child: Text(
+                        AppLocalizations.of(context).articleNoArticles))
                 : _ArticlesList(
                     articles: articles,
                     currentArticleId: currentArticleId,
                   ),
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (e, _) => Center(child: Text('エラー: $e')),
+            error: (e, _) => Center(
+                child: Text(
+                    AppLocalizations.of(context).sidebarErrorLabel(e.toString()))),
           ),
         ),
       ],
@@ -86,8 +91,8 @@ class _ArticlesToolbarState extends ConsumerState<_ArticlesToolbar> {
             child: TextField(
               focusNode: _focusNode,
               autofocus: false,
-              decoration: const InputDecoration(
-                hintText: '記事を検索...',
+              decoration: InputDecoration(
+                hintText: AppLocalizations.of(context).articleSearchHint,
                 prefixIcon: Icon(Icons.search, size: 16),
                 border: InputBorder.none,
                 isDense: true,
@@ -189,7 +194,8 @@ class _ArticleTile extends StatelessWidget {
               ),
             Expanded(
               child: Text(
-                (entry.title ?? '(タイトルなし)').replaceAll(RegExp(r'[\r\n]+'), ' '),
+                (entry.title ?? AppLocalizations.of(context).articleNoTitle)
+                    .replaceAll(RegExp(r'[\r\n]+'), ' '),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight:

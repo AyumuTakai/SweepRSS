@@ -1,0 +1,385 @@
+{
+  "@@locale": "en",
+
+  "menuAbout": "About SweepRSS",
+  "@menuAbout": { "description": "macOS menu: About item" },
+
+  "menuQuit": "Quit SweepRSS",
+  "@menuQuit": { "description": "macOS menu: Quit item" },
+
+  "menuFile": "File",
+  "@menuFile": { "description": "macOS menu: File menu label" },
+
+  "menuImportOpml": "Import OPML...",
+  "@menuImportOpml": { "description": "macOS menu: Import OPML" },
+
+  "menuExportOpml": "Export OPML",
+  "@menuExportOpml": { "description": "macOS menu: Export OPML submenu" },
+
+  "menuExportAllSpaces": "All Spaces",
+  "@menuExportAllSpaces": { "description": "macOS menu: Export all spaces" },
+
+  "menuExportCurrentSpace": "Current Space ({spaceName})",
+  "@menuExportCurrentSpace": {
+    "description": "macOS menu: Export current space with name",
+    "placeholders": {
+      "spaceName": { "type": "String" }
+    }
+  },
+
+  "menuExportCurrentSpaceFallback": "Current Space",
+  "@menuExportCurrentSpaceFallback": { "description": "macOS menu: Export current space when no space active" },
+
+  "menuView": "View",
+  "@menuView": { "description": "macOS menu: View menu label" },
+
+  "menuRefreshAll": "Refresh All Feeds",
+  "@menuRefreshAll": { "description": "macOS menu: Refresh all" },
+
+  "navAll": "All",
+  "@navAll": { "description": "Sidebar: All items navigation label" },
+
+  "navUnread": "Unread",
+  "@navUnread": { "description": "Sidebar: Unread navigation label" },
+
+  "navFlagged": "Flagged",
+  "@navFlagged": { "description": "Sidebar: Flagged navigation label" },
+
+  "navTrash": "Trash",
+  "@navTrash": { "description": "Sidebar: Trash navigation label" },
+
+  "sidebarRefreshTooltip": "Refresh all feeds",
+  "@sidebarRefreshTooltip": { "description": "Sidebar header refresh button tooltip" },
+
+  "sidebarAddFeedTooltip": "Add feed",
+  "@sidebarAddFeedTooltip": { "description": "Sidebar footer add feed button tooltip" },
+
+  "sidebarManageFoldersTooltip": "Manage folders",
+  "@sidebarManageFoldersTooltip": { "description": "Sidebar footer manage folders button tooltip" },
+
+  "sidebarMoveToUncategorized": "Move to uncategorized",
+  "@sidebarMoveToUncategorized": { "description": "Drop target label when dragging feed out of all folders" },
+
+  "sidebarImportPicking": "Selecting file...",
+  "@sidebarImportPicking": { "description": "Import progress: file picker open" },
+
+  "sidebarImportParsing": "Parsing OPML...",
+  "@sidebarImportParsing": { "description": "Import progress: OPML parsing" },
+
+  "sidebarImportFetching": "Fetching articles ({done}/{total})",
+  "@sidebarImportFetching": {
+    "description": "Import progress: fetching articles, with counts",
+    "placeholders": {
+      "done": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "sidebarErrorLabel": "Error: {error}",
+  "@sidebarErrorLabel": {
+    "description": "Generic inline error label",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "feedContextEdit": "Edit",
+  "@feedContextEdit": { "description": "Feed context menu: Edit" },
+
+  "feedContextMarkAllRead": "Mark All as Read",
+  "@feedContextMarkAllRead": { "description": "Feed context menu: Mark all read" },
+
+  "feedContextDelete": "Delete Feed",
+  "@feedContextDelete": { "description": "Feed context menu: Delete (soft)" },
+
+  "feedFetchErrorTooltip": "Fetch error: {error}",
+  "@feedFetchErrorTooltip": {
+    "description": "Feed tile tooltip when fetch error present",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "toastFeedMovedToTrash": "Feed moved to Trash",
+  "@toastFeedMovedToTrash": { "description": "Toast after soft-deleting a feed" },
+
+  "trashContextRestore": "Restore",
+  "@trashContextRestore": { "description": "Trash context menu: restore feed" },
+
+  "trashContextDeletePermanently": "Delete Permanently",
+  "@trashContextDeletePermanently": { "description": "Trash context menu: permanent delete" },
+
+  "trashDeleteDialogTitle": "Permanently Delete \"{title}\"",
+  "@trashDeleteDialogTitle": {
+    "description": "Confirm permanent delete dialog title",
+    "placeholders": {
+      "title": { "type": "String" }
+    }
+  },
+
+  "trashDeleteDialogBody": "This will permanently delete the feed and all its articles.\nThis action cannot be undone.",
+  "@trashDeleteDialogBody": { "description": "Confirm permanent delete dialog body" },
+
+  "folderContextRename": "Rename",
+  "@folderContextRename": { "description": "Folder context menu: Rename" },
+
+  "folderContextDelete": "Delete",
+  "@folderContextDelete": { "description": "Folder context menu: Delete" },
+
+  "folderRenameDialogTitle": "Rename Folder",
+  "@folderRenameDialogTitle": { "description": "Rename folder dialog title" },
+
+  "folderNameLabel": "Folder name",
+  "@folderNameLabel": { "description": "Text field label for folder name" },
+
+  "folderDeleteDialogTitle": "Delete \"{name}\"",
+  "@folderDeleteDialogTitle": {
+    "description": "Delete folder dialog title",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "folderDeleteDialogBody": "The folder will be deleted.\nFeeds inside will be moved to Trash.\nSubfolders will become uncategorized.",
+  "@folderDeleteDialogBody": { "description": "Delete folder confirmation body" },
+
+  "spaceSwitcherSelect": "Select a space",
+  "@spaceSwitcherSelect": { "description": "Space switcher placeholder when no space active" },
+
+  "spaceSwitcherManage": "Manage spaces...",
+  "@spaceSwitcherManage": { "description": "Space switcher menu: open manager" },
+
+  "articleNoArticles": "No articles",
+  "@articleNoArticles": { "description": "Articles panel: empty state" },
+
+  "articleSearchHint": "Search articles...",
+  "@articleSearchHint": { "description": "Articles search field hint text" },
+
+  "articleTrashGuide": "Trash feeds can be right-clicked\nin the sidebar to manage them",
+  "@articleTrashGuide": { "description": "Articles panel: guide shown when trash is selected" },
+
+  "articleNoTitle": "(No title)",
+  "@articleNoTitle": { "description": "Article tile: placeholder when entry has no title" },
+
+  "readerSelectArticle": "Select an article",
+  "@readerSelectArticle": { "description": "Reader panel empty state" },
+
+  "readerNoContent": "No content available",
+  "@readerNoContent": { "description": "Reader: article has no summary and no link" },
+
+  "readerExternalBrowserPrompt": "This site must be viewed in an external browser",
+  "@readerExternalBrowserPrompt": { "description": "Reader: external browser required notice" },
+
+  "readerOpenInBrowser": "Open in Browser",
+  "@readerOpenInBrowser": { "description": "Reader: button to open in external browser" },
+
+  "readerFlagTooltip": "Add flag",
+  "@readerFlagTooltip": { "description": "Reader toolbar: flag button tooltip (unflagged state)" },
+
+  "readerUnflagTooltip": "Remove flag",
+  "@readerUnflagTooltip": { "description": "Reader toolbar: flag button tooltip (flagged state)" },
+
+  "readerOpenInBrowserTooltip": "Open in browser",
+  "@readerOpenInBrowserTooltip": { "description": "Reader toolbar: open-in-browser button tooltip" },
+
+  "readerMarkUnreadTooltip": "Mark as unread",
+  "@readerMarkUnreadTooltip": { "description": "Reader toolbar: mark unread button tooltip" },
+
+  "dialogCancel": "Cancel",
+  "@dialogCancel": { "description": "Generic cancel button" },
+
+  "dialogSave": "Save",
+  "@dialogSave": { "description": "Generic save button" },
+
+  "dialogCreate": "Create",
+  "@dialogCreate": { "description": "Generic create button" },
+
+  "dialogChange": "Change",
+  "@dialogChange": { "description": "Generic change/rename confirm button" },
+
+  "dialogDelete": "Delete",
+  "@dialogDelete": { "description": "Generic delete confirm button" },
+
+  "dialogClose": "Close",
+  "@dialogClose": { "description": "Generic close button" },
+
+  "dialogAdd": "Add",
+  "@dialogAdd": { "description": "Generic add confirm button" },
+
+  "dialogError": "Error: {error}",
+  "@dialogError": {
+    "description": "Generic inline error display in dialogs",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "addFeedDialogTitle": "Add Feed",
+  "@addFeedDialogTitle": { "description": "Add feed dialog title" },
+
+  "addFeedUrlLabel": "Feed URL *",
+  "@addFeedUrlLabel": { "description": "Add feed: URL field label" },
+
+  "addFeedTitleLabel": "Title (optional)",
+  "@addFeedTitleLabel": { "description": "Add feed: title field label" },
+
+  "editFeedDialogTitle": "Edit Feed",
+  "@editFeedDialogTitle": { "description": "Edit feed dialog title" },
+
+  "editFeedTitleLabel": "Title",
+  "@editFeedTitleLabel": { "description": "Edit feed: title field label" },
+
+  "editFeedExternalBrowserLabel": "Open in external browser",
+  "@editFeedExternalBrowserLabel": { "description": "Edit feed: external browser checkbox label" },
+
+  "editFeedExternalBrowserSubtitle": "For JS-heavy sites",
+  "@editFeedExternalBrowserSubtitle": { "description": "Edit feed: external browser checkbox subtitle" },
+
+  "folderManagerDialogTitle": "Manage Folders",
+  "@folderManagerDialogTitle": { "description": "Folder manager dialog title" },
+
+  "folderManagerEmpty": "No folders",
+  "@folderManagerEmpty": { "description": "Folder manager: empty state" },
+
+  "folderManagerAddButton": "Add Folder",
+  "@folderManagerAddButton": { "description": "Folder manager: add folder button" },
+
+  "folderManagerAddDialogTitle": "New Folder",
+  "@folderManagerAddDialogTitle": { "description": "New folder sub-dialog title" },
+
+  "folderManagerRenameDialogTitle": "Rename Folder",
+  "@folderManagerRenameDialogTitle": { "description": "Rename folder sub-dialog title in folder manager" },
+
+  "spaceManagerDialogTitle": "Manage Spaces",
+  "@spaceManagerDialogTitle": { "description": "Space manager dialog title" },
+
+  "spaceManagerEmpty": "No spaces",
+  "@spaceManagerEmpty": { "description": "Space manager: empty state" },
+
+  "spaceManagerAddButton": "Add Space",
+  "@spaceManagerAddButton": { "description": "Space manager: add space button" },
+
+  "spaceManagerAddDialogTitle": "New Space",
+  "@spaceManagerAddDialogTitle": { "description": "New space sub-dialog title" },
+
+  "spaceNameLabel": "Space name",
+  "@spaceNameLabel": { "description": "Text field label for space name" },
+
+  "spaceManagerRenameDialogTitle": "Rename Space",
+  "@spaceManagerRenameDialogTitle": { "description": "Rename space sub-dialog title" },
+
+  "spaceDeleteDialogTitle": "Delete \"{name}\"",
+  "@spaceDeleteDialogTitle": {
+    "description": "Delete space dialog title",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "spaceDeleteDialogBody": "The space will be deleted.\nFolders and feeds will be moved to \"{fallbackName}\".",
+  "@spaceDeleteDialogBody": {
+    "description": "Delete space confirmation body",
+    "placeholders": {
+      "fallbackName": { "type": "String" }
+    }
+  },
+
+  "toastFeedAdded": "Feed added",
+  "@toastFeedAdded": { "description": "Toast: feed successfully added" },
+
+  "toastFeedUpdated": "Feed updated",
+  "@toastFeedUpdated": { "description": "Toast: feed settings saved" },
+
+  "toastFolderCreated": "Folder created",
+  "@toastFolderCreated": { "description": "Toast: new folder created" },
+
+  "toastFolderDeleted": "Folder deleted",
+  "@toastFolderDeleted": { "description": "Toast: folder deleted" },
+
+  "toastSpaceCreated": "Space \"{name}\" created",
+  "@toastSpaceCreated": {
+    "description": "Toast: new space created",
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+
+  "toastSpaceDeleted": "Space deleted",
+  "@toastSpaceDeleted": { "description": "Toast: space deleted" },
+
+  "opmlImportFoldersOnly": "{count, plural, =1{Imported 1 folder (no feeds)} other{Imported {count} folders (no feeds)}}",
+  "@opmlImportFoldersOnly": {
+    "description": "Toast: OPML import completed with only folders",
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "opmlImportComplete": "{feeds, plural, =1{Imported 1 feed} other{Imported {feeds} feeds}}, {folders, plural, =1{1 folder} other{{folders} folders}}",
+  "@opmlImportComplete": {
+    "description": "Toast: OPML import fully completed",
+    "placeholders": {
+      "feeds": { "type": "int" },
+      "folders": { "type": "int" }
+    }
+  },
+
+  "opmlImportError": "Import failed: {error}",
+  "@opmlImportError": {
+    "description": "Toast: OPML import failed",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "opmlExportError": "Export failed: {error}",
+  "@opmlExportError": {
+    "description": "Toast: OPML export failed",
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+
+  "opmlExportAllDialogTitle": "Export OPML (All Spaces)",
+  "@opmlExportAllDialogTitle": { "description": "File save dialog title for all-spaces export" },
+
+  "opmlExportSpaceDialogTitle": "Export OPML ({spaceName})",
+  "@opmlExportSpaceDialogTitle": {
+    "description": "File save dialog title for single-space export",
+    "placeholders": {
+      "spaceName": { "type": "String" }
+    }
+  },
+
+  "opmlUnnamedSpace": "Untitled Space",
+  "@opmlUnnamedSpace": { "description": "Default name when OPML space outline has empty title" },
+
+  "opmlUnnamedFolder": "Untitled Folder",
+  "@opmlUnnamedFolder": { "description": "Default name when OPML folder outline has empty title" },
+
+  "opmlParseError": "OPML body not found",
+  "@opmlParseError": { "description": "OpmlException when body element missing" },
+
+  "errorConnectionTimeout": "Connection timed out",
+  "@errorConnectionTimeout": { "description": "Dio timeout error message" },
+
+  "errorNetwork": "Network error: {detail}",
+  "@errorNetwork": {
+    "description": "Dio connection error",
+    "placeholders": {
+      "detail": { "type": "String" }
+    }
+  },
+
+  "errorUnknown": "Unknown error",
+  "@errorUnknown": { "description": "Fallback error message" },
+
+  "mobileNavFeeds": "Feeds",
+  "@mobileNavFeeds": { "description": "Mobile bottom nav: Feeds tab" },
+
+  "mobileNavArticles": "Articles",
+  "@mobileNavArticles": { "description": "Mobile bottom nav: Articles tab" },
+
+  "mobileNavReader": "Reader",
+  "@mobileNavReader": { "description": "Mobile bottom nav: Reader tab" }
+}

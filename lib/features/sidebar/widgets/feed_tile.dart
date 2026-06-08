@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/selection_provider.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/widgets/toast_overlay.dart';
@@ -29,7 +30,10 @@ class FeedTile extends ConsumerWidget {
       onSecondaryTapDown: (details) =>
           _showContextMenu(context, ref, details.globalPosition),
       child: Tooltip(
-        message: hasFetchError ? '取得エラー: ${feed.lastFetchError}' : '',
+        message: hasFetchError
+            ? AppLocalizations.of(context)
+                .feedFetchErrorTooltip(feed.lastFetchError!)
+            : '',
         child: ListTile(
         dense: true,
         leading: Icon(Icons.rss_feed, size: 14,
@@ -110,20 +114,21 @@ class FeedTile extends ConsumerWidget {
 
   void _showContextMenu(
       BuildContext context, WidgetRef ref, Offset position) {
+    final l10n = AppLocalizations.of(context);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
           position.dx, position.dy, position.dx + 1, position.dy + 1),
       items: [
         PopupMenuItem(
-          child: const Text('編集'),
+          child: Text(l10n.feedContextEdit),
           onTap: () => showDialog(
             context: context,
             builder: (_) => EditFeedDialog(feed: feed),
           ),
         ),
         PopupMenuItem(
-          child: const Text('すべて既読'),
+          child: Text(l10n.feedContextMarkAllRead),
           onTap: () async {
             await ref
                 .read(databaseProvider)
@@ -133,11 +138,15 @@ class FeedTile extends ConsumerWidget {
           },
         ),
         PopupMenuItem(
-          child: const Text('フィードを削除',
-              style: TextStyle(color: Colors.red)),
+          child: Text(l10n.feedContextDelete,
+              style: const TextStyle(color: Colors.red)),
           onTap: () async {
             await ref.read(databaseProvider).feedsDao.softDeleteFeed(feed.id);
-            ref.read(toastProvider.notifier).show('フィードをゴミ箱に移動しました');
+            if (context.mounted) {
+              ref
+                  .read(toastProvider.notifier)
+                  .show(l10n.toastFeedMovedToTrash);
+            }
           },
         ),
       ],

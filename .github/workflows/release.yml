@@ -39,6 +39,9 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Generate l10n
+        run: flutter gen-l10n
+
       - name: Build DMG
         run: flutter_distributor package --platform macos --targets dmg
         env:
@@ -73,6 +76,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
 
       - name: Build EXE
         run: flutter_distributor package --platform windows --targets exe
@@ -117,6 +123,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+
+      - name: Generate l10n
+        run: flutter gen-l10n
 
       - name: Build AppImage
         run: flutter_distributor package --platform linux --targets appimage

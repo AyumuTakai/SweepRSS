@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 import '../../shared/widgets/toast_overlay.dart';
@@ -40,8 +41,12 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
             : _titleController.text.trim(),
         spaceId: activeSpace?.id,
       );
-      ref.read(toastProvider.notifier).show('フィードを追加しました');
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) {
+        ref
+            .read(toastProvider.notifier)
+            .show(AppLocalizations.of(context).toastFeedAdded);
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       setState(() { _error = e.toString(); _loading = false; });
     }
@@ -49,8 +54,9 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AlertDialog(
-      title: const Text('フィードを追加'),
+      title: Text(l10n.addFeedDialogTitle),
       content: SizedBox(
         width: 400,
         child: Column(
@@ -58,8 +64,8 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
           children: [
             TextField(
               controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: 'フィード URL *',
+              decoration: InputDecoration(
+                labelText: l10n.addFeedUrlLabel,
                 hintText: 'https://example.com/feed.xml',
               ),
               autofocus: true,
@@ -68,8 +74,8 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
             const SizedBox(height: 12),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'タイトル (省略可)',
+              decoration: InputDecoration(
+                labelText: l10n.addFeedTitleLabel,
               ),
             ),
             if (_error != null) ...[
@@ -82,13 +88,13 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
       actions: [
         TextButton(
           onPressed: _loading ? null : () => Navigator.of(context).pop(),
-          child: const Text('キャンセル'),
+          child: Text(l10n.dialogCancel),
         ),
         FilledButton(
           onPressed: _loading ? null : _submit,
           child: _loading
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('追加'),
+              : Text(l10n.dialogAdd),
         ),
       ],
     );

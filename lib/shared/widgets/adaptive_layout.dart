@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../l10n/generated/app_localizations.dart';
+
 import '../../core/database/app_database.dart';
 import '../../features/articles/providers/articles_provider.dart';
 import '../../features/articles/widgets/articles_panel.dart';
@@ -265,10 +267,16 @@ class _MobileLayoutState extends State<_MobileLayout> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.folder), label: 'フィード'),
-          NavigationDestination(icon: Icon(Icons.list), label: '記事'),
-          NavigationDestination(icon: Icon(Icons.article), label: 'リーダー'),
+        destinations: [
+          NavigationDestination(
+              icon: const Icon(Icons.folder),
+              label: AppLocalizations.of(context).mobileNavFeeds),
+          NavigationDestination(
+              icon: const Icon(Icons.list),
+              label: AppLocalizations.of(context).mobileNavArticles),
+          NavigationDestination(
+              icon: const Icon(Icons.article),
+              label: AppLocalizations.of(context).mobileNavReader),
         ],
       ),
     );

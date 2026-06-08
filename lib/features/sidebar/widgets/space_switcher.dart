@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/active_space_provider.dart';
 import '../../dialogs/space_manager_dialog.dart';
 
@@ -36,7 +37,8 @@ class SpaceSwitcher extends ConsumerWidget {
             const SizedBox(width: 6),
             Expanded(
               child: Text(
-                activeSpace?.name ?? 'スペースを選択',
+                activeSpace?.name ??
+                    AppLocalizations.of(context).spaceSwitcherSelect,
                 style: const TextStyle(
                     fontSize: 12, fontWeight: FontWeight.w500),
                 overflow: TextOverflow.ellipsis,
@@ -88,7 +90,7 @@ class SpaceSwitcher extends ConsumerWidget {
                   size: 14,
                   color: Theme.of(context).colorScheme.onSurfaceVariant),
               const SizedBox(width: 8),
-              const Text('スペースを管理...'),
+              Text(AppLocalizations.of(context).spaceSwitcherManage),
             ],
           ),
         ),

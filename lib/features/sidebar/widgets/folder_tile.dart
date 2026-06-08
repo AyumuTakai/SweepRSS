@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/folder_expanded_provider.dart';
 import '../../../shared/providers/selection_provider.dart';
@@ -155,16 +156,17 @@ class FolderTile extends ConsumerWidget {
 
   void _showContextMenu(
       BuildContext context, WidgetRef ref, Offset position) {
+    final l10n = AppLocalizations.of(context);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
           position.dx, position.dy, position.dx + 1, position.dy + 1),
       items: [
         PopupMenuItem(
-          child: const ListTile(
+          child: ListTile(
             dense: true,
-            leading: Icon(Icons.drive_file_rename_outline, size: 16),
-            title: Text('リネーム'),
+            leading: const Icon(Icons.drive_file_rename_outline, size: 16),
+            title: Text(l10n.folderContextRename),
             contentPadding: EdgeInsets.zero,
           ),
           onTap: () => Future.microtask(() {
@@ -172,10 +174,12 @@ class FolderTile extends ConsumerWidget {
           }),
         ),
         PopupMenuItem(
-          child: const ListTile(
+          child: ListTile(
             dense: true,
-            leading: Icon(Icons.delete_outline, size: 16, color: Colors.red),
-            title: Text('削除', style: TextStyle(color: Colors.red)),
+            leading:
+                const Icon(Icons.delete_outline, size: 16, color: Colors.red),
+            title: Text(l10n.folderContextDelete,
+                style: const TextStyle(color: Colors.red)),
             contentPadding: EdgeInsets.zero,
           ),
           onTap: () => Future.microtask(() {
@@ -187,25 +191,26 @@ class FolderTile extends ConsumerWidget {
   }
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: folder.name);
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('フォルダをリネーム'),
+        title: Text(l10n.folderRenameDialogTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'フォルダ名'),
+          decoration: InputDecoration(labelText: l10n.folderNameLabel),
           onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('変更'),
+            child: Text(l10n.dialogChange),
           ),
         ],
       ),
@@ -219,24 +224,21 @@ class FolderTile extends ConsumerWidget {
   }
 
   Future<void> _showDeleteDialog(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('「${folder.name}」を削除'),
-        content: const Text(
-          'フォルダを削除します。\n'
-          'フォルダ内のフィードはゴミ箱に移動されます。\n'
-          'サブフォルダは未分類に移動されます。',
-        ),
+        title: Text(l10n.folderDeleteDialogTitle(folder.name)),
+        content: Text(l10n.folderDeleteDialogBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('削除'),
+            child: Text(l10n.dialogDelete),
           ),
         ],
       ),

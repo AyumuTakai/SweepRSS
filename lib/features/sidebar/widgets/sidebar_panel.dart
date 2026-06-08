@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/active_space_provider.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/folder_expanded_provider.dart';
@@ -44,7 +45,7 @@ class SidebarPanel extends ConsumerWidget {
                 children: [
                   _NavItem(
                     icon: Icons.all_inbox,
-                    label: 'すべて',
+                    label: AppLocalizations.of(context).navAll,
                     selected: selection is SelectionAll,
                     unreadCount: ref.watch(totalUnreadCountProvider).valueOrNull,
                     onTap: () => ref.read(selectionProvider.notifier).state =
@@ -52,7 +53,7 @@ class SidebarPanel extends ConsumerWidget {
                   ),
                   _NavItem(
                     icon: Icons.mark_email_unread,
-                    label: '未読',
+                    label: AppLocalizations.of(context).navUnread,
                     selected: selection is SelectionUnread,
                     onTap: () {
                       ref.read(selectionProvider.notifier).state =
@@ -63,7 +64,7 @@ class SidebarPanel extends ConsumerWidget {
                   ),
                   _NavItem(
                     icon: Icons.bookmark,
-                    label: 'フラグ付き',
+                    label: AppLocalizations.of(context).navFlagged,
                     selected: selection is SelectionFlagged,
                     onTap: () => ref.read(selectionProvider.notifier).state =
                         const SelectionFlagged(),
@@ -82,7 +83,9 @@ class SidebarPanel extends ConsumerWidget {
                     ),
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Text('エラー: $e'),
+                    error: (e, _) => Text(
+                        AppLocalizations.of(context)
+                            .sidebarErrorLabel(e.toString())),
                   ),
                   const Divider(height: 1),
                   const _TrashTile(),
@@ -128,7 +131,7 @@ class _SidebarHeader extends ConsumerWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.refresh, size: 18),
-            tooltip: '全フィードを更新',
+            tooltip: AppLocalizations.of(context).sidebarRefreshTooltip,
             onPressed: isRefreshing
                 ? null
                 : () => ref.read(refreshProvider.notifier).refreshAll(),
@@ -145,13 +148,18 @@ class _ImportProgressBar extends ConsumerWidget {
     final importState = ref.watch(opmlImportProvider);
 
     // 完了・エラー時にトーストを表示してリセット
+    final l10n = AppLocalizations.of(context);
     ref.listen(opmlImportProvider, (prev, next) {
-      if (next.status == OpmlImportStatus.done && next.message != null) {
-        ref.read(toastProvider.notifier).show(next.message!);
+      if (next.status == OpmlImportStatus.done) {
+        final msg = next.importedFeeds == 0
+            ? l10n.opmlImportFoldersOnly(next.importedFolders)
+            : l10n.opmlImportComplete(next.importedFeeds, next.importedFolders);
+        ref.read(toastProvider.notifier).show(msg);
         Future.microtask(() => ref.read(opmlImportProvider.notifier).reset());
-      } else if (next.status == OpmlImportStatus.error &&
-          next.message != null) {
-        ref.read(toastProvider.notifier).showError(next.message!);
+      } else if (next.status == OpmlImportStatus.error) {
+        ref.read(toastProvider.notifier).showError(
+              l10n.opmlImportError(next.rawError ?? l10n.errorUnknown),
+            );
         Future.microtask(() => ref.read(opmlImportProvider.notifier).reset());
       }
     });
@@ -165,7 +173,7 @@ class _ImportProgressBar extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           child: Text(
-            _statusLabel(importState),
+            _statusLabel(context, importState),
             style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
         ),
@@ -173,14 +181,15 @@ class _ImportProgressBar extends ConsumerWidget {
     );
   }
 
-  String _statusLabel(OpmlImportState s) {
+  String _statusLabel(BuildContext context, OpmlImportState s) {
+    final l10n = AppLocalizations.of(context);
     switch (s.status) {
       case OpmlImportStatus.picking:
-        return 'ファイルを選択中...';
+        return l10n.sidebarImportPicking;
       case OpmlImportStatus.importing:
-        return 'OPML を解析中...';
+        return l10n.sidebarImportParsing;
       case OpmlImportStatus.refreshing:
-        return '記事を取得中 (${s.refreshDone}/${s.refreshTotal})';
+        return l10n.sidebarImportFetching(s.refreshDone, s.refreshTotal);
       default:
         return '';
     }
@@ -197,7 +206,7 @@ class _SidebarFooter extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.add, size: 18),
-            tooltip: 'フィードを追加',
+            tooltip: AppLocalizations.of(context).sidebarAddFeedTooltip,
             onPressed: () => showDialog(
               context: context,
               builder: (_) => const AddFeedDialog(),
@@ -205,7 +214,7 @@ class _SidebarFooter extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-            tooltip: 'フォルダを管理',
+            tooltip: AppLocalizations.of(context).sidebarManageFoldersTooltip,
             onPressed: () => showDialog(
               context: context,
               builder: (_) => const FolderManagerDialog(),
@@ -308,7 +317,7 @@ class _SidebarItemList extends ConsumerWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 4),
                       child: Text(
-                        'フォルダなしに移動',
+                        AppLocalizations.of(context).sidebarMoveToUncategorized,
                         style: TextStyle(
                           fontSize: 11,
                           color: Theme.of(context).colorScheme.secondary,
@@ -373,7 +382,8 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
             _expanded ? Icons.delete : Icons.delete_outline,
             size: 16,
           ),
-          title: const Text('ゴミ箱', style: TextStyle(fontSize: 13)),
+          title: Text(AppLocalizations.of(context).navTrash,
+              style: const TextStyle(fontSize: 13)),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -441,16 +451,17 @@ class _TrashFeedSidebarTile extends ConsumerWidget {
 
   void _showContextMenu(
       BuildContext context, WidgetRef ref, Offset position) {
+    final l10n = AppLocalizations.of(context);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
           position.dx, position.dy, position.dx + 1, position.dy + 1),
       items: [
         PopupMenuItem(
-          child: const ListTile(
+          child: ListTile(
             dense: true,
-            leading: Icon(Icons.restore, size: 16),
-            title: Text('復元'),
+            leading: const Icon(Icons.restore, size: 16),
+            title: Text(l10n.trashContextRestore),
             contentPadding: EdgeInsets.zero,
           ),
           onTap: () async {
@@ -466,11 +477,12 @@ class _TrashFeedSidebarTile extends ConsumerWidget {
           },
         ),
         PopupMenuItem(
-          child: const ListTile(
+          child: ListTile(
             dense: true,
             leading:
-                Icon(Icons.delete_forever, size: 16, color: Colors.red),
-            title: Text('完全削除', style: TextStyle(color: Colors.red)),
+                const Icon(Icons.delete_forever, size: 16, color: Colors.red),
+            title: Text(l10n.trashContextDeletePermanently,
+                style: const TextStyle(color: Colors.red)),
             contentPadding: EdgeInsets.zero,
           ),
           onTap: () => Future.microtask(() {
@@ -482,21 +494,21 @@ class _TrashFeedSidebarTile extends ConsumerWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('「${feed.title ?? feed.url}」を完全削除'),
-        content: const Text(
-            'フィードとすべての記事を完全に削除します。\nこの操作は取り消せません。'),
+        title: Text(l10n.trashDeleteDialogTitle(feed.title ?? feed.url)),
+        content: Text(l10n.trashDeleteDialogBody),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('完全削除'),
+            child: Text(l10n.trashContextDeletePermanently),
           ),
         ],
       ),

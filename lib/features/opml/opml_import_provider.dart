@@ -11,7 +11,7 @@ class OpmlImportState {
   final OpmlImportStatus status;
   final int refreshDone;
   final int refreshTotal;
-  final String? message; // 成功メッセージまたはエラー文
+  final String? rawError;
   final int importedFeeds;
   final int importedFolders;
 
@@ -19,7 +19,7 @@ class OpmlImportState {
     this.status = OpmlImportStatus.idle,
     this.refreshDone = 0,
     this.refreshTotal = 0,
-    this.message,
+    this.rawError,
     this.importedFeeds = 0,
     this.importedFolders = 0,
   });
@@ -59,7 +59,7 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
     } catch (e) {
       state = OpmlImportState(
         status: OpmlImportStatus.error,
-        message: 'インポート失敗: $e',
+        rawError: e.toString(),
       );
       return;
     }
@@ -67,7 +67,6 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
     if (result.newFeedIds.isEmpty) {
       state = OpmlImportState(
         status: OpmlImportStatus.done,
-        message: 'フォルダ ${result.folders} 件をインポートしました（フィードなし）',
         importedFeeds: 0,
         importedFolders: result.folders,
       );
@@ -103,33 +102,33 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
 
     state = OpmlImportState(
       status: OpmlImportStatus.done,
-      message: 'フィード ${result.feeds} 件、フォルダ ${result.folders} 件をインポートしました',
       importedFeeds: result.feeds,
       importedFolders: result.folders,
     );
   }
 
-  Future<void> exportAllSpaces() async {
+  Future<void> exportAllSpaces({required String dialogTitle}) async {
     final opml = ref.read(opmlServiceProvider);
     try {
-      await opml.exportAllSpacesToFile();
+      await opml.exportAllSpacesToFile(dialogTitle: dialogTitle);
     } catch (e) {
       state = OpmlImportState(
         status: OpmlImportStatus.error,
-        message: 'エクスポート失敗: $e',
+        rawError: e.toString(),
       );
       Future.microtask(reset);
     }
   }
 
-  Future<void> exportCurrentSpace(Space space) async {
+  Future<void> exportCurrentSpace(Space space,
+      {required String dialogTitle}) async {
     final opml = ref.read(opmlServiceProvider);
     try {
-      await opml.exportCurrentSpaceToFile(space);
+      await opml.exportCurrentSpaceToFile(space, dialogTitle: dialogTitle);
     } catch (e) {
       state = OpmlImportState(
         status: OpmlImportStatus.error,
-        message: 'エクスポート失敗: $e',
+        rawError: e.toString(),
       );
       Future.microtask(reset);
     }

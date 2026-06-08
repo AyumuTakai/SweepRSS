@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 import '../../shared/providers/refresh_provider.dart';
@@ -14,47 +15,50 @@ class FolderManagerDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final foldersAsync = ref.watch(foldersStreamProvider);
 
     return AlertDialog(
-      title: const Text('フォルダを管理'),
+      title: Text(l10n.folderManagerDialogTitle),
       content: SizedBox(
         width: 400,
         height: 400,
         child: foldersAsync.when(
           data: (folders) => _FolderList(folders: folders),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('エラー: $e'),
+          error: (e, _) =>
+              Text(l10n.sidebarErrorLabel(e.toString())),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('閉じる'),
+          child: Text(l10n.dialogClose),
         ),
         FilledButton(
           onPressed: () => _showAddFolderDialog(context, ref),
-          child: const Text('フォルダを追加'),
+          child: Text(l10n.folderManagerAddButton),
         ),
       ],
     );
   }
 
   void _showAddFolderDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('新しいフォルダ'),
+        title: Text(l10n.folderManagerAddDialogTitle),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'フォルダ名'),
+          decoration: InputDecoration(labelText: l10n.folderNameLabel),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -69,10 +73,10 @@ class FolderManagerDialog extends ConsumerWidget {
                 order: Value(folders.length),
                 spaceId: Value(activeSpace?.id),
               ));
-              ref.read(toastProvider.notifier).show('フォルダを作成しました');
+              ref.read(toastProvider.notifier).show(l10n.toastFolderCreated);
               if (ctx.mounted) Navigator.of(ctx).pop();
             },
-            child: const Text('作成'),
+            child: Text(l10n.dialogCreate),
           ),
         ],
       ),
@@ -86,8 +90,9 @@ class _FolderList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     if (folders.isEmpty) {
-      return const Center(child: Text('フォルダがありません'));
+      return Center(child: Text(l10n.folderManagerEmpty));
     }
     return ListView.builder(
       itemCount: folders.length,
@@ -106,8 +111,15 @@ class _FolderList extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline, size: 18),
                 onPressed: () async {
-                  await ref.read(databaseProvider).foldersDao.deleteFolder(folder.id);
-                  ref.read(toastProvider.notifier).show('フォルダを削除しました');
+                  await ref
+                      .read(databaseProvider)
+                      .foldersDao
+                      .deleteFolder(folder.id);
+                  if (context.mounted) {
+                    ref
+                        .read(toastProvider.notifier)
+                        .show(AppLocalizations.of(context).toastFolderDeleted);
+                  }
                 },
               ),
             ],
@@ -118,11 +130,12 @@ class _FolderList extends ConsumerWidget {
   }
 
   void _showRenameDialog(BuildContext context, WidgetRef ref, Folder folder) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: folder.name);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('フォルダ名を変更'),
+        title: Text(l10n.folderManagerRenameDialogTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -130,16 +143,19 @@ class _FolderList extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () async {
               final name = controller.text.trim();
               if (name.isEmpty) return;
-              await ref.read(databaseProvider).foldersDao.renameFolder(folder.id, name);
+              await ref
+                  .read(databaseProvider)
+                  .foldersDao
+                  .renameFolder(folder.id, name);
               if (ctx.mounted) Navigator.of(ctx).pop();
             },
-            child: const Text('変更'),
+            child: Text(l10n.dialogChange),
           ),
         ],
       ),

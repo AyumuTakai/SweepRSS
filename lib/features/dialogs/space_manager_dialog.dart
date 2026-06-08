@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/database/app_database.dart';
+import '../../l10n/generated/app_localizations.dart';
 import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 import '../../shared/widgets/toast_overlay.dart';
@@ -11,47 +12,50 @@ class SpaceManagerDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final spacesAsync = ref.watch(spacesStreamProvider);
 
     return AlertDialog(
-      title: const Text('スペースを管理'),
+      title: Text(l10n.spaceManagerDialogTitle),
       content: SizedBox(
         width: 400,
         height: 400,
         child: spacesAsync.when(
           data: (spaces) => _SpaceList(spaces: spaces),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Text('エラー: $e'),
+          error: (e, _) =>
+              Text(l10n.sidebarErrorLabel(e.toString())),
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('閉じる'),
+          child: Text(l10n.dialogClose),
         ),
         FilledButton(
           onPressed: () => _showAddSpaceDialog(context, ref),
-          child: const Text('スペースを追加'),
+          child: Text(l10n.spaceManagerAddButton),
         ),
       ],
     );
   }
 
   void _showAddSpaceDialog(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('新しいスペース'),
+        title: Text(l10n.spaceManagerAddDialogTitle),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(labelText: 'スペース名'),
+          decoration: InputDecoration(labelText: l10n.spaceNameLabel),
           autofocus: true,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -61,10 +65,10 @@ class SpaceManagerDialog extends ConsumerWidget {
               final newId = await db.spacesDao.insertSpace(name);
               // 作成したスペースをすぐにアクティブにする
               ref.read(activeSpaceProvider.notifier).setSpace(newId);
-              ref.read(toastProvider.notifier).show('スペース「$name」を作成しました');
+              ref.read(toastProvider.notifier).show(l10n.toastSpaceCreated(name));
               if (ctx.mounted) Navigator.of(ctx).pop();
             },
-            child: const Text('作成'),
+            child: Text(l10n.dialogCreate),
           ),
         ],
       ),
@@ -78,8 +82,9 @@ class _SpaceList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     if (spaces.isEmpty) {
-      return const Center(child: Text('スペースがありません'));
+      return Center(child: Text(l10n.spaceManagerEmpty));
     }
 
     final activeSpace = ref.watch(resolvedActiveSpaceProvider);
@@ -139,11 +144,12 @@ class _SpaceList extends ConsumerWidget {
   }
 
   void _showRenameDialog(BuildContext context, WidgetRef ref, Space space) {
+    final l10n = AppLocalizations.of(context);
     final controller = TextEditingController(text: space.name);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('スペース名を変更'),
+        title: Text(l10n.spaceManagerRenameDialogTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -151,7 +157,7 @@ class _SpaceList extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -163,7 +169,7 @@ class _SpaceList extends ConsumerWidget {
                   .renameSpace(space.id, name);
               if (ctx.mounted) Navigator.of(ctx).pop();
             },
-            child: const Text('変更'),
+            child: Text(l10n.dialogChange),
           ),
         ],
       ),
@@ -176,26 +182,24 @@ class _SpaceList extends ConsumerWidget {
     Space space,
     List<Space> spaces,
   ) async {
+    final l10n = AppLocalizations.of(context);
     // 削除後のフォールバックスペース（別のスペースを選ぶ）
     final fallback = spaces.firstWhere((s) => s.id != space.id);
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('「${space.name}」を削除'),
-        content: Text(
-          'スペースを削除します。\n'
-          '配下のフォルダとフィードは「${fallback.name}」に移動されます。',
-        ),
+        title: Text(l10n.spaceDeleteDialogTitle(space.name)),
+        content: Text(l10n.spaceDeleteDialogBody(fallback.name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('キャンセル'),
+            child: Text(l10n.dialogCancel),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('削除'),
+            child: Text(l10n.dialogDelete),
           ),
         ],
       ),
@@ -210,7 +214,7 @@ class _SpaceList extends ConsumerWidget {
     }
     await db.spacesDao.deleteSpace(space.id, fallback.id);
     if (context.mounted) {
-      ref.read(toastProvider.notifier).show('スペースを削除しました');
+      ref.read(toastProvider.notifier).show(l10n.toastSpaceDeleted);
     }
   }
 }
