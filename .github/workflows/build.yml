@@ -12,7 +12,7 @@ env:
 jobs:
   # ── macOS ────────────────────────────────────────────────────────────────
   build-macos:
-    name: Build (macOS)
+    name: Build (macOS DMG)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,37 +23,44 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
-      - name: Build macOS (release)
-        run: flutter build macos --release
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Package DMG with Fastforge
+        run: dart pub global run fastforge package --platform macos --targets dmg
         env:
           CODE_SIGN_IDENTITY: ""
           CODE_SIGNING_REQUIRED: "NO"
           CODE_SIGNING_ALLOWED: "NO"
 
-      - name: Zip artifact
-        run: |
-          cd build/macos/Build/Products/Release
-          zip -r "$GITHUB_WORKSPACE/SweepRSS-macos.zip" SweepRSS.app
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: SweepRSS-macos
-          path: SweepRSS-macos.zip
+          path: dist/**/*.dmg
           retention-days: 7
 
   # ── Windows ──────────────────────────────────────────────────────────────
   build-windows:
-    name: Build (Windows)
+    name: Build (Windows EXE)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install NSIS
+        run: choco install nsis -y
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -61,25 +68,31 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
-      - name: Build Windows (release)
-        run: flutter build windows --release
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Package EXE with Fastforge
+        run: dart pub global run fastforge package --platform windows --targets exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: SweepRSS-windows
-          path: build\windows\x64\runner\Release
+          path: dist/**/*.exe
           retention-days: 7
 
   # ── Linux ────────────────────────────────────────────────────────────────
   build-linux:
-    name: Build (Linux)
+    name: Build (Linux AppImage)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,7 +103,15 @@ jobs:
           sudo apt-get install -y \
             clang cmake ninja-build pkg-config \
             libgtk-3-dev liblzma-dev \
-            libwebkit2gtk-4.1-dev
+            libwebkit2gtk-4.1-dev \
+            libfuse2
+
+      - name: Install appimagetool
+        run: |
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage" \
+            -O appimagetool
+          chmod +x appimagetool
+          sudo mv appimagetool /usr/local/bin/appimagetool
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -98,18 +119,24 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos
 
-      - name: Build Linux (release)
-        run: flutter build linux --release
+      - name: Generate l10n
+        run: flutter gen-l10n
+
+      - name: Package AppImage with Fastforge
+        run: dart pub global run fastforge package --platform linux --targets appimage
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: SweepRSS-linux
-          path: build/linux/x64/release/bundle
+          path: dist/**/*.AppImage
           retention-days: 7

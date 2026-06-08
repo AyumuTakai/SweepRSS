@@ -33,8 +33,8 @@ jobs:
       - name: Install create-dmg
         run: brew install create-dmg
 
-      - name: Install flutter_distributor
-        run: dart pub global activate flutter_distributor
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
 
       - name: Get dependencies
         run: flutter pub get
@@ -42,8 +42,8 @@ jobs:
       - name: Generate l10n
         run: flutter gen-l10n
 
-      - name: Build DMG
-        run: flutter_distributor package --platform macos --targets dmg
+      - name: Package DMG with Fastforge
+        run: dart pub global run fastforge release --name production --jobs release-macos-dmg
         env:
           CODE_SIGN_IDENTITY: ""
           CODE_SIGNING_REQUIRED: "NO"
@@ -71,8 +71,8 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install flutter_distributor
-        run: dart pub global activate flutter_distributor
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
 
       - name: Get dependencies
         run: flutter pub get
@@ -80,8 +80,8 @@ jobs:
       - name: Generate l10n
         run: flutter gen-l10n
 
-      - name: Build EXE
-        run: flutter_distributor package --platform windows --targets exe
+      - name: Package EXE with Fastforge
+        run: dart pub global run fastforge release --name production --jobs release-windows-exe
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
@@ -118,8 +118,8 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install flutter_distributor
-        run: dart pub global activate flutter_distributor
+      - name: Install Fastforge
+        run: dart pub global activate fastforge
 
       - name: Get dependencies
         run: flutter pub get
@@ -127,8 +127,8 @@ jobs:
       - name: Generate l10n
         run: flutter gen-l10n
 
-      - name: Build AppImage
-        run: flutter_distributor package --platform linux --targets appimage
+      - name: Package AppImage with Fastforge
+        run: dart pub global run fastforge release --name production --jobs release-linux-appimage
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
