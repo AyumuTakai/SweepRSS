@@ -35,9 +35,17 @@ class HtmlSanitizer {
 
   static String injectBaseUrl(String html, String baseUrl) {
     if (html.contains('<base')) return html;
+    if (baseUrl.isEmpty) return html;
+    // http / https 以外のスキームや不正な URL は無視する
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null || (uri.scheme != 'http' && uri.scheme != 'https')) {
+      return html;
+    }
+    // 属性値を破断させる文字をエスケープ
+    final safeUrl = baseUrl.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
     return html.replaceFirstMapped(
       RegExp('<head[^>]*>', caseSensitive: false),
-      (match) => '${match.group(0)}<base href="$baseUrl">',
+      (match) => '${match.group(0)}<base href="$safeUrl">',
     );
   }
 }

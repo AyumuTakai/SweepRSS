@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/services/html_sanitizer.dart';
+import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/reader_controller_provider.dart';
 import '../../../shared/providers/selection_provider.dart';
@@ -22,10 +23,10 @@ class ReaderPanel extends ConsumerWidget {
     return articleAsync.when(
       data: (article) {
         if (article == null) {
-          return const Center(
+          return Center(
             child: Text(
-              '記事を選択してください',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              AppLocalizations.of(context).readerSelectArticle,
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
             ),
           );
         }
@@ -53,7 +54,9 @@ class ReaderPanel extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('エラー: $e')),
+      error: (e, _) => Center(
+          child: Text(AppLocalizations.of(context)
+              .sidebarErrorLabel(e.toString()))),
     );
   }
 }
@@ -90,8 +93,9 @@ class _ReaderContent extends StatelessWidget {
     }
 
     // モード3: コンテンツなし
-    return const Center(
-      child: Text('コンテンツがありません', style: TextStyle(color: Colors.grey)),
+    return Center(
+      child: Text(AppLocalizations.of(context).readerNoContent,
+          style: const TextStyle(color: Colors.grey)),
     );
   }
 }
@@ -101,6 +105,12 @@ class _ReaderContent extends StatelessWidget {
 class _UrlView extends ConsumerWidget {
   final String url;
   const _UrlView({required this.url});
+
+  /// http / https 以外のスキームを launchUrl に渡さないようフィルタする。
+  static bool _isSafeUrl(String url) {
+    final uri = Uri.tryParse(url);
+    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -126,7 +136,7 @@ class _UrlView extends ConsumerWidget {
         // 自動リダイレクトや JS ナビゲーションは WebView 内で処理する。
         if (action.navigationType == NavigationType.LINK_ACTIVATED) {
           final dest = action.request.url;
-          if (dest != null) {
+          if (dest != null && _isSafeUrl(dest.toString())) {
             await launchUrl(dest.uriValue, mode: LaunchMode.externalApplication);
           }
           return NavigationActionPolicy.CANCEL;
@@ -177,7 +187,10 @@ class _SummaryView extends ConsumerWidget {
         if (url.startsWith('data:') || url == 'about:blank') {
           return NavigationActionPolicy.ALLOW;
         }
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        // http/https のみ外部ブラウザで開く（file: / javascript: 等を除外）
+        if (_isSafeUrl(url)) {
+          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        }
         return NavigationActionPolicy.CANCEL;
       },
     );
@@ -219,16 +232,18 @@ class _ExternalBrowserPrompt extends StatelessWidget {
         children: [
           const Icon(Icons.open_in_browser, size: 48, color: Colors.grey),
           const SizedBox(height: 12),
-          const Text(
-            'このサイトは外部ブラウザで表示する必要があります',
-            style: TextStyle(color: Colors.grey),
+          Text(
+            AppLocalizations.of(context).readerExternalBrowserPrompt,
+            style: const TextStyle(color: Colors.grey),
           ),
           const SizedBox(height: 16),
           FilledButton.icon(
             icon: const Icon(Icons.open_in_new, size: 16),
-            label: const Text('ブラウザで開く'),
-            onPressed: () =>
-                launchUrl(Uri.parse(link), mode: LaunchMode.externalApplication),
+            label: Text(AppLocalizations.of(context).readerOpenInBrowser),
+            onPressed: _UrlView._isSafeUrl(link)
+                ? () => launchUrl(Uri.parse(link),
+                    mode: LaunchMode.externalApplication)
+                : null,
           ),
         ],
       ),
@@ -271,7 +286,9 @@ class _ReaderToolbar extends ConsumerWidget {
               flagged ? Icons.bookmark : Icons.bookmark_border,
               size: 18,
             ),
-            tooltip: flagged ? 'フラグを解除' : 'フラグを付ける',
+            tooltip: flagged
+                ? AppLocalizations.of(context).readerUnflagTooltip
+                : AppLocalizations.of(context).readerFlagTooltip,
             onPressed: () async {
               await ref
                   .read(databaseProvider)
@@ -279,16 +296,16 @@ class _ReaderToolbar extends ConsumerWidget {
                   .toggleFlag(articleId, !flagged);
             },
           ),
-          if (link != null)
+          if (link != null && _UrlView._isSafeUrl(link!))
             IconButton(
               icon: const Icon(Icons.open_in_new, size: 18),
-              tooltip: 'ブラウザで開く',
+              tooltip: AppLocalizations.of(context).readerOpenInBrowserTooltip,
               onPressed: () =>
                   launchUrl(Uri.parse(link!), mode: LaunchMode.externalApplication),
             ),
           IconButton(
             icon: const Icon(Icons.mark_email_read, size: 18),
-            tooltip: '未読に戻す',
+            tooltip: AppLocalizations.of(context).readerMarkUnreadTooltip,
             onPressed: () async {
               await ref
                   .read(databaseProvider)

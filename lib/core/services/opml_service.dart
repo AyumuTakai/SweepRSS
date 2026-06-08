@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:xml/xml.dart';
 
 import '../database/app_database.dart';
+import 'url_validator.dart';
 
 class OpmlService {
   final AppDatabase _db;
@@ -45,6 +46,10 @@ class OpmlService {
 
     await _db.transaction(() async {
       var folderOrderBase = (await _db.foldersDao.getAllFolders()).length;
+      // 重複 URL チェック用: DB 既存 URL + 今回インポートした URL の両方を追跡する
+      final existingUrls = (await _db.feedsDao.getAllActiveFeeds())
+          .map((f) => f.url)
+          .toSet();
 
       Future<void> processOutlines(
         Iterable<XmlElement> outlines,
@@ -61,6 +66,11 @@ class OpmlService {
               '';
 
           if (xmlUrl != null && xmlUrl.isNotEmpty) {
+            // 不正な URL（プライベート IP 等）を含む OPML でも安全にインポートできるよう
+            // 同じバリデーションを適用してスキップする
+            if (UrlValidator.validate(xmlUrl) != null) continue;
+            // DB 既存 + 今回インポート済み URL との重複をスキップ
+            if (existingUrls.contains(xmlUrl)) continue;
             try {
               final feedId = _uuid.v4();
               await _db.feedsDao.insertFeed(FeedsCompanion.insert(
@@ -70,14 +80,15 @@ class OpmlService {
                 folderId: Value(parentFolderId),
                 spaceId: Value(currentSpaceId),
               ));
+              existingUrls.add(xmlUrl); // 同一 OPML 内の重複も防ぐ
               newFeedIds.add(feedId);
               feedCount++;
             } catch (_) {
-              // 重複 URL などはスキップ
+              // その他の DB エラーはスキップ
             }
           } else if (outline.getAttribute('sweepType') == 'space') {
             // マルチスペース OPML: スペースを作成して配下を処理
-            final spaceName = title.isNotEmpty ? title : '無題スペース';
+            final spaceName = title.isNotEmpty ? title : 'Untitled Space';
             final newSpaceId =
                 await _db.spacesDao.insertSpace(spaceName);
             await processOutlines(
@@ -91,7 +102,7 @@ class OpmlService {
             final folderId = _uuid.v4();
             await _db.foldersDao.insertFolder(FoldersCompanion.insert(
               id: folderId,
-              name: title.isNotEmpty ? title : '無題フォルダ',
+              name: title.isNotEmpty ? title : 'Untitled Folder',
               parent: Value(parentFolderId),
               order: Value(folderOrderBase++),
               spaceId: Value(currentSpaceId),
@@ -206,12 +217,16 @@ class OpmlService {
     return builder.buildDocument().toXmlString(pretty: true);
   }
 
+  static const int _maxExportDepth = 20;
+
   void _buildFolderXml(
     XmlBuilder builder,
     Folder folder,
     List<Folder> allFolders,
-    List<Feed> allFeeds,
-  ) {
+    List<Feed> allFeeds, {
+    int depth = 0,
+  }) {
+    if (depth > _maxExportDepth) return;
     builder.element('outline',
         attributes: {'text': folder.name, 'title': folder.name}, nest: () {
       final feedsInFolder = allFeeds.where((f) => f.folderId == folder.id);
@@ -225,15 +240,15 @@ class OpmlService {
       }
       final subfolders = allFolders.where((f) => f.parent == folder.id);
       for (final sub in subfolders) {
-        _buildFolderXml(builder, sub, allFolders, allFeeds);
+        _buildFolderXml(builder, sub, allFolders, allFeeds, depth: depth + 1);
       }
     });
   }
 
-  Future<void> exportAllSpacesToFile() async {
+  Future<void> exportAllSpacesToFile({required String dialogTitle}) async {
     final content = await exportAllSpacesToString();
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: 'OPML をエクスポート（すべてのスペース）',
+      dialogTitle: dialogTitle,
       fileName: 'sweeprss_export_all.opml',
     );
     if (path != null) {
@@ -241,10 +256,11 @@ class OpmlService {
     }
   }
 
-  Future<void> exportCurrentSpaceToFile(Space space) async {
+  Future<void> exportCurrentSpaceToFile(Space space,
+      {required String dialogTitle}) async {
     final content = await exportCurrentSpaceToString(space.id);
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: 'OPML をエクスポート（${space.name}）',
+      dialogTitle: dialogTitle,
       fileName: 'sweeprss_export_${_toSafeFilename(space.name)}.opml',
     );
     if (path != null) {
