@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../../core/models/selection.dart';
+import '../../../shared/providers/active_space_provider.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/folder_expanded_provider.dart';
 import '../../../shared/providers/refresh_provider.dart';
@@ -13,14 +14,18 @@ import '../../dialogs/folder_manager_dialog.dart';
 import '../../opml/opml_import_provider.dart';
 import 'folder_tile.dart';
 import 'feed_tile.dart';
+import 'space_switcher.dart';
 
 class SidebarPanel extends ConsumerWidget {
   const SidebarPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final activeSpace = ref.watch(resolvedActiveSpaceProvider);
     final feedsAsync = ref.watch(feedsStreamProvider);
-    final foldersAsync = ref.watch(foldersStreamProvider);
+    final foldersAsync = activeSpace != null
+        ? ref.watch(spaceFoldersStreamProvider(activeSpace.id))
+        : ref.watch(foldersStreamProvider);
     final selection = ref.watch(selectionProvider);
     final refreshState = ref.watch(refreshProvider);
 
@@ -29,59 +34,65 @@ class SidebarPanel extends ConsumerWidget {
       child: Material(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         child: Column(
-        children: [
-          _SidebarHeader(isRefreshing: refreshState.isRefreshing),
-          Expanded(
-            child: ListView(
-              children: [
-                _NavItem(
-                  icon: Icons.all_inbox,
-                  label: 'すべて',
-                  selected: selection is SelectionAll,
-                  onTap: () => ref.read(selectionProvider.notifier).state = const SelectionAll(),
-                ),
-                _NavItem(
-                  icon: Icons.mark_email_unread,
-                  label: '未読',
-                  selected: selection is SelectionUnread,
-                  onTap: () => ref.read(selectionProvider.notifier).state = const SelectionUnread(),
-                ),
-                _NavItem(
-                  icon: Icons.bookmark,
-                  label: 'フラグ付き',
-                  selected: selection is SelectionFlagged,
-                  onTap: () => ref.read(selectionProvider.notifier).state = const SelectionFlagged(),
-                ),
-                const Divider(height: 1),
-                foldersAsync.when(
-                  data: (folders) => feedsAsync.when(
-                    data: (feeds) => _SidebarItemList(
-                      folders: folders,
-                      feeds: feeds,
-                      selection: selection,
-                    ),
-                    loading: () => const SizedBox.shrink(),
-                    error: (e, st) => const SizedBox.shrink(),
+          children: [
+            _SidebarHeader(isRefreshing: refreshState.isRefreshing),
+            const SpaceSwitcher(),
+            Expanded(
+              child: ListView(
+                children: [
+                  _NavItem(
+                    icon: Icons.all_inbox,
+                    label: 'すべて',
+                    selected: selection is SelectionAll,
+                    onTap: () => ref.read(selectionProvider.notifier).state =
+                        const SelectionAll(),
                   ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('エラー: $e'),
-                ),
-                const Divider(height: 1),
-                const _TrashTile(),
-              ],
+                  _NavItem(
+                    icon: Icons.mark_email_unread,
+                    label: '未読',
+                    selected: selection is SelectionUnread,
+                    onTap: () => ref.read(selectionProvider.notifier).state =
+                        const SelectionUnread(),
+                  ),
+                  _NavItem(
+                    icon: Icons.bookmark,
+                    label: 'フラグ付き',
+                    selected: selection is SelectionFlagged,
+                    onTap: () => ref.read(selectionProvider.notifier).state =
+                        const SelectionFlagged(),
+                  ),
+                  const Divider(height: 1),
+                  foldersAsync.when(
+                    data: (folders) => feedsAsync.when(
+                      data: (feeds) => _SidebarItemList(
+                        folders: folders,
+                        feeds: feeds,
+                        selection: selection,
+                        activeSpace: activeSpace,
+                      ),
+                      loading: () => const SizedBox.shrink(),
+                      error: (e, st) => const SizedBox.shrink(),
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text('エラー: $e'),
+                  ),
+                  const Divider(height: 1),
+                  const _TrashTile(),
+                ],
+              ),
             ),
-          ),
-          _ImportProgressBar(),
-          if (refreshState.isRefreshing)
-            LinearProgressIndicator(
-              value: refreshState.total > 0
-                  ? refreshState.done / refreshState.total
-                  : null,
-            ),
-          _SidebarFooter(),
-        ],
+            _ImportProgressBar(),
+            if (refreshState.isRefreshing)
+              LinearProgressIndicator(
+                value: refreshState.total > 0
+                    ? refreshState.done / refreshState.total
+                    : null,
+              ),
+            _SidebarFooter(),
+          ],
+        ),
       ),
-    ),
     );
   }
 }
@@ -105,7 +116,10 @@ class _SidebarHeader extends ConsumerWidget {
           ),
           IconButton(
             icon: isRefreshing
-                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.refresh, size: 18),
             tooltip: '全フィードを更新',
             onPressed: isRefreshing
@@ -128,7 +142,8 @@ class _ImportProgressBar extends ConsumerWidget {
       if (next.status == OpmlImportStatus.done && next.message != null) {
         ref.read(toastProvider.notifier).show(next.message!);
         Future.microtask(() => ref.read(opmlImportProvider.notifier).reset());
-      } else if (next.status == OpmlImportStatus.error && next.message != null) {
+      } else if (next.status == OpmlImportStatus.error &&
+          next.message != null) {
         ref.read(toastProvider.notifier).showError(next.message!);
         Future.microtask(() => ref.read(opmlImportProvider.notifier).reset());
       }
@@ -211,26 +226,32 @@ class _SidebarFooter extends ConsumerWidget {
 class _SidebarItemList extends ConsumerWidget {
   final List<Folder> folders;
   final List<Feed> feeds;
-  /// 親 (SidebarPanel) から宣言的に渡される選択状態。
-  /// このコンポーネント自身は selectionProvider を watch しない。
   final Selection selection;
+  final Space? activeSpace;
 
   const _SidebarItemList({
     required this.folders,
     required this.feeds,
     required this.selection,
+    required this.activeSpace,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final topLevelFolders = folders.where((f) => f.parent == null).toList();
-    final feedsWithoutFolder = feeds.where((f) => f.folderId == null).toList();
+
+    // スペースがアクティブな場合、未分類フィードはスペースIDで絞り込む
+    final feedsWithoutFolder = activeSpace != null
+        ? feeds
+            .where(
+                (f) => f.folderId == null && f.spaceId == activeSpace!.id)
+            .toList()
+        : feeds.where((f) => f.folderId == null).toList();
 
     if (topLevelFolders.isEmpty && feedsWithoutFolder.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    // 開閉マップと選択状態をここで一度だけ取得し、子へ宣言的に伝播する
     final expandedMap =
         ref.watch(folderExpandedProvider).valueOrNull ?? const {};
 
@@ -298,7 +319,6 @@ class _SidebarItemList extends ConsumerWidget {
                         ),
                       ),
                     ),
-                  // isSelected を親が計算して渡す
                   ...feedsWithoutFolder.map((feed) => FeedTile(
                         feed: feed,
                         isSelected: selection is SelectionFeed &&
@@ -327,7 +347,6 @@ class _SidebarItemList extends ConsumerWidget {
       await db.foldersDao.reorderFolder(list[i].id, i);
     }
   }
-
 }
 
 // ── ゴミ箱タイル (展開可能) ──────────────────────────────────────────────────
@@ -441,7 +460,6 @@ class _TrashFeedSidebarTile extends ConsumerWidget {
           onTap: () async {
             final db = ref.read(databaseProvider);
             await db.feedsDao.restoreFeed(feed.id);
-            // 元のフォルダが削除済みの場合は未分類へ移動
             if (feed.folderId != null) {
               final folder =
                   await db.foldersDao.getFolderById(feed.folderId!);
@@ -454,10 +472,9 @@ class _TrashFeedSidebarTile extends ConsumerWidget {
         PopupMenuItem(
           child: const ListTile(
             dense: true,
-            leading: Icon(Icons.delete_forever,
-                size: 16, color: Colors.red),
-            title:
-                Text('完全削除', style: TextStyle(color: Colors.red)),
+            leading:
+                Icon(Icons.delete_forever, size: 16, color: Colors.red),
+            title: Text('完全削除', style: TextStyle(color: Colors.red)),
             contentPadding: EdgeInsets.zero,
           ),
           onTap: () => Future.microtask(() {

@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:drift/drift.dart' show Value;
 
 import '../../core/database/app_database.dart';
+import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 import '../../shared/providers/refresh_provider.dart';
 import '../../shared/widgets/toast_overlay.dart';
@@ -60,11 +61,13 @@ class FolderManagerDialog extends ConsumerWidget {
               final name = controller.text.trim();
               if (name.isEmpty) return;
               final db = ref.read(databaseProvider);
+              final activeSpace = ref.read(resolvedActiveSpaceProvider);
               final folders = await db.foldersDao.getAllFolders();
               await db.foldersDao.insertFolder(FoldersCompanion.insert(
                 id: const Uuid().v4(),
                 name: name,
                 order: Value(folders.length),
+                spaceId: Value(activeSpace?.id),
               ));
               ref.read(toastProvider.notifier).show('フォルダを作成しました');
               if (ctx.mounted) Navigator.of(ctx).pop();

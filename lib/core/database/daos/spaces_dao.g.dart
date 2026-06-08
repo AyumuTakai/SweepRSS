@@ -1,0 +1,8 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'spaces_dao.dart';
+
+// ignore_for_file: type=lint
+mixin _$SpacesDaoMixin on DatabaseAccessor<AppDatabase> {
+  $SpacesTable get spaces => attachedDatabase.spaces;
+}

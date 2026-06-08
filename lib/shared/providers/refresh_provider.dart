@@ -19,6 +19,12 @@ final foldersStreamProvider = StreamProvider<List<Folder>>((ref) {
   return db.foldersDao.watchAllFolders();
 });
 
+final spaceFoldersStreamProvider =
+    StreamProvider.family<List<Folder>, String>((ref, spaceId) {
+  final db = ref.watch(databaseProvider);
+  return db.foldersDao.watchFoldersInSpace(spaceId);
+});
+
 // 自動更新 (60秒ごと)
 final autoRefreshProvider = Provider<void>((ref) {
   final timer = Timer.periodic(const Duration(seconds: 60), (_) async {

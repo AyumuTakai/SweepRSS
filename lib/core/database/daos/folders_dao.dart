@@ -17,6 +17,20 @@ class FoldersDao extends DatabaseAccessor<AppDatabase> with _$FoldersDaoMixin {
     return (select(folders)..orderBy([(f) => OrderingTerm.asc(f.order)])).get();
   }
 
+  Stream<List<Folder>> watchFoldersInSpace(String spaceId) {
+    return (select(folders)
+          ..where((f) => f.spaceId.equals(spaceId))
+          ..orderBy([(f) => OrderingTerm.asc(f.order)]))
+        .watch();
+  }
+
+  Future<List<Folder>> getFoldersInSpace(String spaceId) {
+    return (select(folders)
+          ..where((f) => f.spaceId.equals(spaceId))
+          ..orderBy([(f) => OrderingTerm.asc(f.order)]))
+        .get();
+  }
+
   Future<Folder?> getFolderById(String id) {
     return (select(folders)..where((f) => f.id.equals(id))).getSingleOrNull();
   }

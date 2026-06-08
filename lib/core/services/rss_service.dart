@@ -40,7 +40,8 @@ class RssService {
     );
   }
 
-  Future<void> addFeed(String url, {String? title, String? folderId}) async {
+  Future<void> addFeed(String url,
+      {String? title, String? folderId, String? spaceId}) async {
     final error = UrlValidator.validate(url);
     if (error != null) throw RssException(error);
 
@@ -61,8 +62,11 @@ class RssService {
       title: Value(feedTitle),
       feedType: Value(feedType),
       folderId: Value(folderId),
+      spaceId: Value(spaceId),
       description: Value(feed is RssFeed ? feed.description : null),
-      link: Value(feed is RssFeed ? feed.link : (feed as AtomFeed).links?.firstOrNull?.href),
+      link: Value(feed is RssFeed
+          ? feed.link
+          : (feed as AtomFeed).links?.firstOrNull?.href),
     ));
 
     await _saveEntries(feedId, feed);

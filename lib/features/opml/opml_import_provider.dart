@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/database/app_database.dart';
 import '../../core/services/opml_service.dart';
+import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 
 enum OpmlImportStatus { idle, picking, importing, refreshing, done, error }
@@ -37,6 +39,9 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
   Future<void> startImport() async {
     if (state.isRunning) return;
 
+    // 現在アクティブなスペースへインポート
+    final activeSpace = ref.read(resolvedActiveSpaceProvider);
+
     // 1. ファイルを選択
     state = const OpmlImportState(status: OpmlImportStatus.picking);
     final opml = ref.read(opmlServiceProvider);
@@ -50,7 +55,7 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
     state = const OpmlImportState(status: OpmlImportStatus.importing);
     late final OpmlImportResult result;
     try {
-      result = await opml.importFromFile(path);
+      result = await opml.importFromFile(path, spaceId: activeSpace?.id);
     } catch (e) {
       state = OpmlImportState(
         status: OpmlImportStatus.error,
@@ -104,10 +109,23 @@ class OpmlImportNotifier extends Notifier<OpmlImportState> {
     );
   }
 
-  Future<void> exportOpml() async {
+  Future<void> exportAllSpaces() async {
     final opml = ref.read(opmlServiceProvider);
     try {
-      await opml.exportToFile();
+      await opml.exportAllSpacesToFile();
+    } catch (e) {
+      state = OpmlImportState(
+        status: OpmlImportStatus.error,
+        message: 'エクスポート失敗: $e',
+      );
+      Future.microtask(reset);
+    }
+  }
+
+  Future<void> exportCurrentSpace(Space space) async {
+    final opml = ref.read(opmlServiceProvider);
+    try {
+      await opml.exportCurrentSpaceToFile(space);
     } catch (e) {
       state = OpmlImportState(
         status: OpmlImportStatus.error,

@@ -114,6 +114,17 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
         ),
         defaultValue: const Constant(false),
       );
+  static const VerificationMeta _spaceIdMeta = const VerificationMeta(
+    'spaceId',
+  );
+  @override
+  late final GeneratedColumn<String> spaceId = GeneratedColumn<String>(
+    'space_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -126,6 +137,7 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
     deletedAt,
     folderId,
     requiresExternalBrowser,
+    spaceId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -206,6 +218,12 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
         ),
       );
     }
+    if (data.containsKey('space_id')) {
+      context.handle(
+        _spaceIdMeta,
+        spaceId.isAcceptableOrUnknown(data['space_id']!, _spaceIdMeta),
+      );
+    }
     return context;
   }
 
@@ -255,6 +273,10 @@ class $FeedsTable extends Feeds with TableInfo<$FeedsTable, Feed> {
         DriftSqlType.bool,
         data['${effectivePrefix}requires_external_browser'],
       )!,
+      spaceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}space_id'],
+      ),
     );
   }
 
@@ -275,6 +297,7 @@ class Feed extends DataClass implements Insertable<Feed> {
   final DateTime? deletedAt;
   final String? folderId;
   final bool requiresExternalBrowser;
+  final String? spaceId;
   const Feed({
     required this.id,
     required this.url,
@@ -286,6 +309,7 @@ class Feed extends DataClass implements Insertable<Feed> {
     this.deletedAt,
     this.folderId,
     required this.requiresExternalBrowser,
+    this.spaceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -314,6 +338,9 @@ class Feed extends DataClass implements Insertable<Feed> {
       map['folder_id'] = Variable<String>(folderId);
     }
     map['requires_external_browser'] = Variable<bool>(requiresExternalBrowser);
+    if (!nullToAbsent || spaceId != null) {
+      map['space_id'] = Variable<String>(spaceId);
+    }
     return map;
   }
 
@@ -341,6 +368,9 @@ class Feed extends DataClass implements Insertable<Feed> {
           ? const Value.absent()
           : Value(folderId),
       requiresExternalBrowser: Value(requiresExternalBrowser),
+      spaceId: spaceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spaceId),
     );
   }
 
@@ -362,6 +392,7 @@ class Feed extends DataClass implements Insertable<Feed> {
       requiresExternalBrowser: serializer.fromJson<bool>(
         json['requiresExternalBrowser'],
       ),
+      spaceId: serializer.fromJson<String?>(json['spaceId']),
     );
   }
   @override
@@ -380,6 +411,7 @@ class Feed extends DataClass implements Insertable<Feed> {
       'requiresExternalBrowser': serializer.toJson<bool>(
         requiresExternalBrowser,
       ),
+      'spaceId': serializer.toJson<String?>(spaceId),
     };
   }
 
@@ -394,6 +426,7 @@ class Feed extends DataClass implements Insertable<Feed> {
     Value<DateTime?> deletedAt = const Value.absent(),
     Value<String?> folderId = const Value.absent(),
     bool? requiresExternalBrowser,
+    Value<String?> spaceId = const Value.absent(),
   }) => Feed(
     id: id ?? this.id,
     url: url ?? this.url,
@@ -406,6 +439,7 @@ class Feed extends DataClass implements Insertable<Feed> {
     folderId: folderId.present ? folderId.value : this.folderId,
     requiresExternalBrowser:
         requiresExternalBrowser ?? this.requiresExternalBrowser,
+    spaceId: spaceId.present ? spaceId.value : this.spaceId,
   );
   Feed copyWithCompanion(FeedsCompanion data) {
     return Feed(
@@ -423,6 +457,7 @@ class Feed extends DataClass implements Insertable<Feed> {
       requiresExternalBrowser: data.requiresExternalBrowser.present
           ? data.requiresExternalBrowser.value
           : this.requiresExternalBrowser,
+      spaceId: data.spaceId.present ? data.spaceId.value : this.spaceId,
     );
   }
 
@@ -438,7 +473,8 @@ class Feed extends DataClass implements Insertable<Feed> {
           ..write('published: $published, ')
           ..write('deletedAt: $deletedAt, ')
           ..write('folderId: $folderId, ')
-          ..write('requiresExternalBrowser: $requiresExternalBrowser')
+          ..write('requiresExternalBrowser: $requiresExternalBrowser, ')
+          ..write('spaceId: $spaceId')
           ..write(')'))
         .toString();
   }
@@ -455,6 +491,7 @@ class Feed extends DataClass implements Insertable<Feed> {
     deletedAt,
     folderId,
     requiresExternalBrowser,
+    spaceId,
   );
   @override
   bool operator ==(Object other) =>
@@ -469,7 +506,8 @@ class Feed extends DataClass implements Insertable<Feed> {
           other.published == this.published &&
           other.deletedAt == this.deletedAt &&
           other.folderId == this.folderId &&
-          other.requiresExternalBrowser == this.requiresExternalBrowser);
+          other.requiresExternalBrowser == this.requiresExternalBrowser &&
+          other.spaceId == this.spaceId);
 }
 
 class FeedsCompanion extends UpdateCompanion<Feed> {
@@ -483,6 +521,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
   final Value<DateTime?> deletedAt;
   final Value<String?> folderId;
   final Value<bool> requiresExternalBrowser;
+  final Value<String?> spaceId;
   final Value<int> rowid;
   const FeedsCompanion({
     this.id = const Value.absent(),
@@ -495,6 +534,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     this.deletedAt = const Value.absent(),
     this.folderId = const Value.absent(),
     this.requiresExternalBrowser = const Value.absent(),
+    this.spaceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FeedsCompanion.insert({
@@ -508,6 +548,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     this.deletedAt = const Value.absent(),
     this.folderId = const Value.absent(),
     this.requiresExternalBrowser = const Value.absent(),
+    this.spaceId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        url = Value(url);
@@ -522,6 +563,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     Expression<DateTime>? deletedAt,
     Expression<String>? folderId,
     Expression<bool>? requiresExternalBrowser,
+    Expression<String>? spaceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -536,6 +578,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
       if (folderId != null) 'folder_id': folderId,
       if (requiresExternalBrowser != null)
         'requires_external_browser': requiresExternalBrowser,
+      if (spaceId != null) 'space_id': spaceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -551,6 +594,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
     Value<DateTime?>? deletedAt,
     Value<String?>? folderId,
     Value<bool>? requiresExternalBrowser,
+    Value<String?>? spaceId,
     Value<int>? rowid,
   }) {
     return FeedsCompanion(
@@ -565,6 +609,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
       folderId: folderId ?? this.folderId,
       requiresExternalBrowser:
           requiresExternalBrowser ?? this.requiresExternalBrowser,
+      spaceId: spaceId ?? this.spaceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -604,6 +649,9 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
         requiresExternalBrowser.value,
       );
     }
+    if (spaceId.present) {
+      map['space_id'] = Variable<String>(spaceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -623,6 +671,7 @@ class FeedsCompanion extends UpdateCompanion<Feed> {
           ..write('deletedAt: $deletedAt, ')
           ..write('folderId: $folderId, ')
           ..write('requiresExternalBrowser: $requiresExternalBrowser, ')
+          ..write('spaceId: $spaceId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1180,8 +1229,26 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _spaceIdMeta = const VerificationMeta(
+    'spaceId',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, type, parent, order];
+  late final GeneratedColumn<String> spaceId = GeneratedColumn<String>(
+    'space_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    type,
+    parent,
+    order,
+    spaceId,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1225,6 +1292,12 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
         order.isAcceptableOrUnknown(data['order']!, _orderMeta),
       );
     }
+    if (data.containsKey('space_id')) {
+      context.handle(
+        _spaceIdMeta,
+        spaceId.isAcceptableOrUnknown(data['space_id']!, _spaceIdMeta),
+      );
+    }
     return context;
   }
 
@@ -1254,6 +1327,10 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
         DriftSqlType.int,
         data['${effectivePrefix}order'],
       )!,
+      spaceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}space_id'],
+      ),
     );
   }
 
@@ -1269,12 +1346,14 @@ class Folder extends DataClass implements Insertable<Folder> {
   final int type;
   final String? parent;
   final int order;
+  final String? spaceId;
   const Folder({
     required this.id,
     required this.name,
     required this.type,
     this.parent,
     required this.order,
+    this.spaceId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1286,6 +1365,9 @@ class Folder extends DataClass implements Insertable<Folder> {
       map['parent'] = Variable<String>(parent);
     }
     map['order'] = Variable<int>(order);
+    if (!nullToAbsent || spaceId != null) {
+      map['space_id'] = Variable<String>(spaceId);
+    }
     return map;
   }
 
@@ -1298,6 +1380,9 @@ class Folder extends DataClass implements Insertable<Folder> {
           ? const Value.absent()
           : Value(parent),
       order: Value(order),
+      spaceId: spaceId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(spaceId),
     );
   }
 
@@ -1312,6 +1397,7 @@ class Folder extends DataClass implements Insertable<Folder> {
       type: serializer.fromJson<int>(json['type']),
       parent: serializer.fromJson<String?>(json['parent']),
       order: serializer.fromJson<int>(json['order']),
+      spaceId: serializer.fromJson<String?>(json['spaceId']),
     );
   }
   @override
@@ -1323,6 +1409,7 @@ class Folder extends DataClass implements Insertable<Folder> {
       'type': serializer.toJson<int>(type),
       'parent': serializer.toJson<String?>(parent),
       'order': serializer.toJson<int>(order),
+      'spaceId': serializer.toJson<String?>(spaceId),
     };
   }
 
@@ -1332,12 +1419,14 @@ class Folder extends DataClass implements Insertable<Folder> {
     int? type,
     Value<String?> parent = const Value.absent(),
     int? order,
+    Value<String?> spaceId = const Value.absent(),
   }) => Folder(
     id: id ?? this.id,
     name: name ?? this.name,
     type: type ?? this.type,
     parent: parent.present ? parent.value : this.parent,
     order: order ?? this.order,
+    spaceId: spaceId.present ? spaceId.value : this.spaceId,
   );
   Folder copyWithCompanion(FoldersCompanion data) {
     return Folder(
@@ -1346,6 +1435,7 @@ class Folder extends DataClass implements Insertable<Folder> {
       type: data.type.present ? data.type.value : this.type,
       parent: data.parent.present ? data.parent.value : this.parent,
       order: data.order.present ? data.order.value : this.order,
+      spaceId: data.spaceId.present ? data.spaceId.value : this.spaceId,
     );
   }
 
@@ -1356,13 +1446,14 @@ class Folder extends DataClass implements Insertable<Folder> {
           ..write('name: $name, ')
           ..write('type: $type, ')
           ..write('parent: $parent, ')
-          ..write('order: $order')
+          ..write('order: $order, ')
+          ..write('spaceId: $spaceId')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, type, parent, order);
+  int get hashCode => Object.hash(id, name, type, parent, order, spaceId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1371,7 +1462,8 @@ class Folder extends DataClass implements Insertable<Folder> {
           other.name == this.name &&
           other.type == this.type &&
           other.parent == this.parent &&
-          other.order == this.order);
+          other.order == this.order &&
+          other.spaceId == this.spaceId);
 }
 
 class FoldersCompanion extends UpdateCompanion<Folder> {
@@ -1380,6 +1472,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
   final Value<int> type;
   final Value<String?> parent;
   final Value<int> order;
+  final Value<String?> spaceId;
   final Value<int> rowid;
   const FoldersCompanion({
     this.id = const Value.absent(),
@@ -1387,6 +1480,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     this.type = const Value.absent(),
     this.parent = const Value.absent(),
     this.order = const Value.absent(),
+    this.spaceId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   FoldersCompanion.insert({
@@ -1395,6 +1489,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     this.type = const Value.absent(),
     this.parent = const Value.absent(),
     this.order = const Value.absent(),
+    this.spaceId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name);
@@ -1404,6 +1499,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     Expression<int>? type,
     Expression<String>? parent,
     Expression<int>? order,
+    Expression<String>? spaceId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1412,6 +1508,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       if (type != null) 'type': type,
       if (parent != null) 'parent': parent,
       if (order != null) 'order': order,
+      if (spaceId != null) 'space_id': spaceId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1422,6 +1519,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     Value<int>? type,
     Value<String?>? parent,
     Value<int>? order,
+    Value<String?>? spaceId,
     Value<int>? rowid,
   }) {
     return FoldersCompanion(
@@ -1430,6 +1528,7 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       type: type ?? this.type,
       parent: parent ?? this.parent,
       order: order ?? this.order,
+      spaceId: spaceId ?? this.spaceId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1452,6 +1551,9 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     if (order.present) {
       map['order'] = Variable<int>(order.value);
     }
+    if (spaceId.present) {
+      map['space_id'] = Variable<String>(spaceId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1466,6 +1568,307 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
           ..write('type: $type, ')
           ..write('parent: $parent, ')
           ..write('order: $order, ')
+          ..write('spaceId: $spaceId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SpacesTable extends Spaces with TableInfo<$SpacesTable, Space> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SpacesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _iconMeta = const VerificationMeta('icon');
+  @override
+  late final GeneratedColumn<String> icon = GeneratedColumn<String>(
+    'icon',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _orderMeta = const VerificationMeta('order');
+  @override
+  late final GeneratedColumn<int> order = GeneratedColumn<int>(
+    'order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, icon, order];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'spaces';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Space> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('icon')) {
+      context.handle(
+        _iconMeta,
+        icon.isAcceptableOrUnknown(data['icon']!, _iconMeta),
+      );
+    }
+    if (data.containsKey('order')) {
+      context.handle(
+        _orderMeta,
+        order.isAcceptableOrUnknown(data['order']!, _orderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Space map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Space(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      icon: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}icon'],
+      ),
+      order: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order'],
+      )!,
+    );
+  }
+
+  @override
+  $SpacesTable createAlias(String alias) {
+    return $SpacesTable(attachedDatabase, alias);
+  }
+}
+
+class Space extends DataClass implements Insertable<Space> {
+  final String id;
+  final String name;
+  final String? icon;
+  final int order;
+  const Space({
+    required this.id,
+    required this.name,
+    this.icon,
+    required this.order,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || icon != null) {
+      map['icon'] = Variable<String>(icon);
+    }
+    map['order'] = Variable<int>(order);
+    return map;
+  }
+
+  SpacesCompanion toCompanion(bool nullToAbsent) {
+    return SpacesCompanion(
+      id: Value(id),
+      name: Value(name),
+      icon: icon == null && nullToAbsent ? const Value.absent() : Value(icon),
+      order: Value(order),
+    );
+  }
+
+  factory Space.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Space(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      icon: serializer.fromJson<String?>(json['icon']),
+      order: serializer.fromJson<int>(json['order']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'icon': serializer.toJson<String?>(icon),
+      'order': serializer.toJson<int>(order),
+    };
+  }
+
+  Space copyWith({
+    String? id,
+    String? name,
+    Value<String?> icon = const Value.absent(),
+    int? order,
+  }) => Space(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    icon: icon.present ? icon.value : this.icon,
+    order: order ?? this.order,
+  );
+  Space copyWithCompanion(SpacesCompanion data) {
+    return Space(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      icon: data.icon.present ? data.icon.value : this.icon,
+      order: data.order.present ? data.order.value : this.order,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Space(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('icon: $icon, ')
+          ..write('order: $order')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, icon, order);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Space &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.icon == this.icon &&
+          other.order == this.order);
+}
+
+class SpacesCompanion extends UpdateCompanion<Space> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String?> icon;
+  final Value<int> order;
+  final Value<int> rowid;
+  const SpacesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.icon = const Value.absent(),
+    this.order = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SpacesCompanion.insert({
+    required String id,
+    required String name,
+    this.icon = const Value.absent(),
+    this.order = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       name = Value(name);
+  static Insertable<Space> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? icon,
+    Expression<int>? order,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (icon != null) 'icon': icon,
+      if (order != null) 'order': order,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SpacesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String?>? icon,
+    Value<int>? order,
+    Value<int>? rowid,
+  }) {
+    return SpacesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+      order: order ?? this.order,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (icon.present) {
+      map['icon'] = Variable<String>(icon.value);
+    }
+    if (order.present) {
+      map['order'] = Variable<int>(order.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SpacesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('icon: $icon, ')
+          ..write('order: $order, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1478,14 +1881,21 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FeedsTable feeds = $FeedsTable(this);
   late final $EntriesTable entries = $EntriesTable(this);
   late final $FoldersTable folders = $FoldersTable(this);
+  late final $SpacesTable spaces = $SpacesTable(this);
   late final FeedsDao feedsDao = FeedsDao(this as AppDatabase);
   late final EntriesDao entriesDao = EntriesDao(this as AppDatabase);
   late final FoldersDao foldersDao = FoldersDao(this as AppDatabase);
+  late final SpacesDao spacesDao = SpacesDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [feeds, entries, folders];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    feeds,
+    entries,
+    folders,
+    spaces,
+  ];
 }
 
 typedef $$FeedsTableCreateCompanionBuilder =
@@ -1500,6 +1910,7 @@ typedef $$FeedsTableCreateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<String?> folderId,
       Value<bool> requiresExternalBrowser,
+      Value<String?> spaceId,
       Value<int> rowid,
     });
 typedef $$FeedsTableUpdateCompanionBuilder =
@@ -1514,6 +1925,7 @@ typedef $$FeedsTableUpdateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<String?> folderId,
       Value<bool> requiresExternalBrowser,
+      Value<String?> spaceId,
       Value<int> rowid,
     });
 
@@ -1572,6 +1984,11 @@ class $$FeedsTableFilterComposer extends Composer<_$AppDatabase, $FeedsTable> {
 
   ColumnFilters<bool> get requiresExternalBrowser => $composableBuilder(
     column: $table.requiresExternalBrowser,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spaceId => $composableBuilder(
+    column: $table.spaceId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1634,6 +2051,11 @@ class $$FeedsTableOrderingComposer
     column: $table.requiresExternalBrowser,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get spaceId => $composableBuilder(
+    column: $table.spaceId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FeedsTableAnnotationComposer
@@ -1678,6 +2100,9 @@ class $$FeedsTableAnnotationComposer
     column: $table.requiresExternalBrowser,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get spaceId =>
+      $composableBuilder(column: $table.spaceId, builder: (column) => column);
 }
 
 class $$FeedsTableTableManager
@@ -1718,6 +2143,7 @@ class $$FeedsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> folderId = const Value.absent(),
                 Value<bool> requiresExternalBrowser = const Value.absent(),
+                Value<String?> spaceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FeedsCompanion(
                 id: id,
@@ -1730,6 +2156,7 @@ class $$FeedsTableTableManager
                 deletedAt: deletedAt,
                 folderId: folderId,
                 requiresExternalBrowser: requiresExternalBrowser,
+                spaceId: spaceId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1744,6 +2171,7 @@ class $$FeedsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<String?> folderId = const Value.absent(),
                 Value<bool> requiresExternalBrowser = const Value.absent(),
+                Value<String?> spaceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FeedsCompanion.insert(
                 id: id,
@@ -1756,6 +2184,7 @@ class $$FeedsTableTableManager
                 deletedAt: deletedAt,
                 folderId: folderId,
                 requiresExternalBrowser: requiresExternalBrowser,
+                spaceId: spaceId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2038,6 +2467,7 @@ typedef $$FoldersTableCreateCompanionBuilder =
       Value<int> type,
       Value<String?> parent,
       Value<int> order,
+      Value<String?> spaceId,
       Value<int> rowid,
     });
 typedef $$FoldersTableUpdateCompanionBuilder =
@@ -2047,6 +2477,7 @@ typedef $$FoldersTableUpdateCompanionBuilder =
       Value<int> type,
       Value<String?> parent,
       Value<int> order,
+      Value<String?> spaceId,
       Value<int> rowid,
     });
 
@@ -2081,6 +2512,11 @@ class $$FoldersTableFilterComposer
 
   ColumnFilters<int> get order => $composableBuilder(
     column: $table.order,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get spaceId => $composableBuilder(
+    column: $table.spaceId,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2118,6 +2554,11 @@ class $$FoldersTableOrderingComposer
     column: $table.order,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get spaceId => $composableBuilder(
+    column: $table.spaceId,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$FoldersTableAnnotationComposer
@@ -2143,6 +2584,9 @@ class $$FoldersTableAnnotationComposer
 
   GeneratedColumn<int> get order =>
       $composableBuilder(column: $table.order, builder: (column) => column);
+
+  GeneratedColumn<String> get spaceId =>
+      $composableBuilder(column: $table.spaceId, builder: (column) => column);
 }
 
 class $$FoldersTableTableManager
@@ -2178,6 +2622,7 @@ class $$FoldersTableTableManager
                 Value<int> type = const Value.absent(),
                 Value<String?> parent = const Value.absent(),
                 Value<int> order = const Value.absent(),
+                Value<String?> spaceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FoldersCompanion(
                 id: id,
@@ -2185,6 +2630,7 @@ class $$FoldersTableTableManager
                 type: type,
                 parent: parent,
                 order: order,
+                spaceId: spaceId,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2194,6 +2640,7 @@ class $$FoldersTableTableManager
                 Value<int> type = const Value.absent(),
                 Value<String?> parent = const Value.absent(),
                 Value<int> order = const Value.absent(),
+                Value<String?> spaceId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FoldersCompanion.insert(
                 id: id,
@@ -2201,6 +2648,7 @@ class $$FoldersTableTableManager
                 type: type,
                 parent: parent,
                 order: order,
+                spaceId: spaceId,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2225,6 +2673,181 @@ typedef $$FoldersTableProcessedTableManager =
       Folder,
       PrefetchHooks Function()
     >;
+typedef $$SpacesTableCreateCompanionBuilder =
+    SpacesCompanion Function({
+      required String id,
+      required String name,
+      Value<String?> icon,
+      Value<int> order,
+      Value<int> rowid,
+    });
+typedef $$SpacesTableUpdateCompanionBuilder =
+    SpacesCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String?> icon,
+      Value<int> order,
+      Value<int> rowid,
+    });
+
+class $$SpacesTableFilterComposer
+    extends Composer<_$AppDatabase, $SpacesTable> {
+  $$SpacesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SpacesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SpacesTable> {
+  $$SpacesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get icon => $composableBuilder(
+    column: $table.icon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get order => $composableBuilder(
+    column: $table.order,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SpacesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SpacesTable> {
+  $$SpacesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get icon =>
+      $composableBuilder(column: $table.icon, builder: (column) => column);
+
+  GeneratedColumn<int> get order =>
+      $composableBuilder(column: $table.order, builder: (column) => column);
+}
+
+class $$SpacesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SpacesTable,
+          Space,
+          $$SpacesTableFilterComposer,
+          $$SpacesTableOrderingComposer,
+          $$SpacesTableAnnotationComposer,
+          $$SpacesTableCreateCompanionBuilder,
+          $$SpacesTableUpdateCompanionBuilder,
+          (Space, BaseReferences<_$AppDatabase, $SpacesTable, Space>),
+          Space,
+          PrefetchHooks Function()
+        > {
+  $$SpacesTableTableManager(_$AppDatabase db, $SpacesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SpacesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SpacesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SpacesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> icon = const Value.absent(),
+                Value<int> order = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SpacesCompanion(
+                id: id,
+                name: name,
+                icon: icon,
+                order: order,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String name,
+                Value<String?> icon = const Value.absent(),
+                Value<int> order = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SpacesCompanion.insert(
+                id: id,
+                name: name,
+                icon: icon,
+                order: order,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SpacesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SpacesTable,
+      Space,
+      $$SpacesTableFilterComposer,
+      $$SpacesTableOrderingComposer,
+      $$SpacesTableAnnotationComposer,
+      $$SpacesTableCreateCompanionBuilder,
+      $$SpacesTableUpdateCompanionBuilder,
+      (Space, BaseReferences<_$AppDatabase, $SpacesTable, Space>),
+      Space,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2235,4 +2858,6 @@ class $AppDatabaseManager {
       $$EntriesTableTableManager(_db, _db.entries);
   $$FoldersTableTableManager get folders =>
       $$FoldersTableTableManager(_db, _db.folders);
+  $$SpacesTableTableManager get spaces =>
+      $$SpacesTableTableManager(_db, _db.spaces);
 }

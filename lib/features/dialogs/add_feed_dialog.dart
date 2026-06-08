@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/providers/active_space_provider.dart';
 import '../../shared/providers/database_provider.dart';
 import '../../shared/widgets/toast_overlay.dart';
 
@@ -31,9 +32,13 @@ class _AddFeedDialogState extends ConsumerState<AddFeedDialog> {
     setState(() { _loading = true; _error = null; });
 
     try {
+      final activeSpace = ref.read(resolvedActiveSpaceProvider);
       await ref.read(rsServiceProvider).addFeed(
         url,
-        title: _titleController.text.trim().isEmpty ? null : _titleController.text.trim(),
+        title: _titleController.text.trim().isEmpty
+            ? null
+            : _titleController.text.trim(),
+        spaceId: activeSpace?.id,
       );
       ref.read(toastProvider.notifier).show('フィードを追加しました');
       if (mounted) Navigator.of(context).pop();

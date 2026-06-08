@@ -12,6 +12,7 @@ class Feeds extends Table {
   TextColumn get folderId => text().nullable()();
   BoolColumn get requiresExternalBrowser =>
       boolean().withDefault(const Constant(false))();
+  TextColumn get spaceId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

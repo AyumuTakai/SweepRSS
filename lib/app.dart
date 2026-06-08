@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/opml/opml_import_provider.dart';
+import 'shared/providers/active_space_provider.dart';
 import 'shared/providers/refresh_provider.dart';
 import 'shared/widgets/adaptive_layout.dart';
 import 'shared/widgets/toast_overlay.dart';
@@ -44,6 +45,7 @@ class _AppShell extends ConsumerWidget {
     final isImporting = ref.watch(
       opmlImportProvider.select((s) => s.isRunning),
     );
+    final activeSpace = ref.watch(resolvedActiveSpaceProvider);
 
     return PlatformMenuBar(
       menus: [
@@ -61,7 +63,8 @@ class _AppShell extends ConsumerWidget {
             PlatformMenuItemGroup(members: [
               PlatformMenuItem(
                 label: 'SweepRSS を終了',
-                shortcut: const SingleActivator(LogicalKeyboardKey.keyQ, meta: true),
+                shortcut: const SingleActivator(LogicalKeyboardKey.keyQ,
+                    meta: true),
                 onSelected: SystemNavigator.pop,
               ),
             ]),
@@ -72,16 +75,39 @@ class _AppShell extends ConsumerWidget {
           menus: [
             PlatformMenuItem(
               label: 'OPML をインポート...',
-              shortcut: const SingleActivator(LogicalKeyboardKey.keyI, meta: true),
+              shortcut: const SingleActivator(LogicalKeyboardKey.keyI,
+                  meta: true),
               onSelected: isImporting
                   ? null
-                  : () => ref.read(opmlImportProvider.notifier).startImport(),
+                  : () =>
+                      ref.read(opmlImportProvider.notifier).startImport(),
             ),
             PlatformMenuItemGroup(members: [
-              PlatformMenuItem(
-                label: 'OPML をエクスポート...',
-                shortcut: const SingleActivator(LogicalKeyboardKey.keyE, meta: true),
-                onSelected: () => ref.read(opmlImportProvider.notifier).exportOpml(),
+              PlatformMenu(
+                label: 'OPML をエクスポート',
+                menus: [
+                  PlatformMenuItem(
+                    label: 'すべてのスペース',
+                    shortcut: const SingleActivator(
+                        LogicalKeyboardKey.keyE,
+                        meta: true,
+                        shift: true),
+                    onSelected: () =>
+                        ref.read(opmlImportProvider.notifier).exportAllSpaces(),
+                  ),
+                  PlatformMenuItem(
+                    label: activeSpace != null
+                        ? '現在のスペース（${activeSpace.name}）'
+                        : '現在のスペース',
+                    shortcut: const SingleActivator(LogicalKeyboardKey.keyE,
+                        meta: true),
+                    onSelected: activeSpace != null
+                        ? () => ref
+                            .read(opmlImportProvider.notifier)
+                            .exportCurrentSpace(activeSpace)
+                        : null,
+                  ),
+                ],
               ),
             ]),
           ],
@@ -91,8 +117,10 @@ class _AppShell extends ConsumerWidget {
           menus: [
             PlatformMenuItem(
               label: '全フィードを更新',
-              shortcut: const SingleActivator(LogicalKeyboardKey.keyR, meta: true),
-              onSelected: () => ref.read(refreshProvider.notifier).refreshAll(),
+              shortcut: const SingleActivator(LogicalKeyboardKey.keyR,
+                  meta: true),
+              onSelected: () =>
+                  ref.read(refreshProvider.notifier).refreshAll(),
             ),
           ],
         ),
@@ -104,5 +132,4 @@ class _AppShell extends ConsumerWidget {
       ),
     );
   }
-
 }
