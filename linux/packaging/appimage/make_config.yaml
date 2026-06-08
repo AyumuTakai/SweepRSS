@@ -4,6 +4,9 @@
 # ※ここが未指定だと Null エラーになる可能性が非常に高いです。
 id: "jp.hackwork.sweeprss"
 
+# パッケージの表示名
+display_name: "SweepRSS"
+
 # デスクトップエントリの表示名
 name: "SweepRSS"
 
