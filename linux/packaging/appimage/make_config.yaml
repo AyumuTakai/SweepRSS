@@ -1,10 +1,15 @@
 # linux/packaging/appimage/make_config.yaml
 
+# アプリケーションのユニークなID（逆ドメイン形式。例: com.example.app）
+# ※ここが未指定だと Null エラーになる可能性が非常に高いです。
+id: "jp.hackwork.sweeprss"
+
 # デスクトップエントリの表示名
 name: "SweepRSS"
-# アプリケーションのアイコン（linux/flutter/assets/ などにあるアイコン画像を指定）
-# ※まだ用意していない場合は、プロジェクト内の適切なアイコンパスに変更してください
+
+# アプリケーションのアイコンパス（※実際にある有効な画像パスを指定してください）
 icon: "linux/flutter/assets/ic_launcher.png"
-# アプリのカテゴリ（必須）
+
+# アプリのカテゴリ
 categories:
   - "Utility"
