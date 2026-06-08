@@ -218,75 +218,80 @@ class _WinLinuxMenuBar extends ConsumerWidget {
       child: Focus(
         autofocus: true,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            MenuBar(
-              children: [
-                SubmenuButton(
-                  menuChildren: [
-                    MenuItemButton(
-                      onPressed: () => showAboutDialog(
-                        context: context,
-                        applicationName: 'SweepRSS',
-                        applicationVersion: '0.1.0',
+            Material(
+              elevation: 1,
+              color: Theme.of(context).colorScheme.surface,
+              child: MenuBar(
+                children: [
+                  SubmenuButton(
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: () => showAboutDialog(
+                          context: context,
+                          applicationName: 'SweepRSS',
+                          applicationVersion: '0.1.0',
+                        ),
+                        child: Text(l10n.menuAbout),
                       ),
-                      child: Text(l10n.menuAbout),
-                    ),
-                    const Divider(),
-                    MenuItemButton(
-                      onPressed: SystemNavigator.pop,
-                      shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyQ, control: true),
-                      child: Text(l10n.menuQuit),
-                    ),
-                  ],
-                  child: const Text('SweepRSS'),
-                ),
-                SubmenuButton(
-                  menuChildren: [
-                    MenuItemButton(
-                      onPressed: isImporting ? null : importOpml,
-                      shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyI, control: true),
-                      child: Text(l10n.menuImportOpml),
-                    ),
-                    SubmenuButton(
-                      menuChildren: [
-                        MenuItemButton(
-                          onPressed: exportAll,
-                          shortcut: const SingleActivator(
-                              LogicalKeyboardKey.keyE,
-                              control: true,
-                              shift: true),
-                          child: Text(l10n.menuExportAllSpaces),
-                        ),
-                        MenuItemButton(
-                          onPressed: activeSpace != null ? exportCurrent : null,
-                          shortcut: const SingleActivator(
-                              LogicalKeyboardKey.keyE, control: true),
-                          child: Text(
-                            activeSpace != null
-                                ? l10n.menuExportCurrentSpace(activeSpace.name)
-                                : l10n.menuExportCurrentSpaceFallback,
+                      const Divider(),
+                      MenuItemButton(
+                        onPressed: SystemNavigator.pop,
+                        shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyQ, control: true),
+                        child: Text(l10n.menuQuit),
+                      ),
+                    ],
+                    child: const Text('SweepRSS'),
+                  ),
+                  SubmenuButton(
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: isImporting ? null : importOpml,
+                        shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyI, control: true),
+                        child: Text(l10n.menuImportOpml),
+                      ),
+                      SubmenuButton(
+                        menuChildren: [
+                          MenuItemButton(
+                            onPressed: exportAll,
+                            shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyE,
+                                control: true,
+                                shift: true),
+                            child: Text(l10n.menuExportAllSpaces),
                           ),
-                        ),
-                      ],
-                      child: Text(l10n.menuExportOpml),
-                    ),
-                  ],
-                  child: Text(l10n.menuFile),
-                ),
-                SubmenuButton(
-                  menuChildren: [
-                    MenuItemButton(
-                      onPressed: refreshAll,
-                      shortcut: const SingleActivator(
-                          LogicalKeyboardKey.keyR, control: true),
-                      child: Text(l10n.menuRefreshAll),
-                    ),
-                  ],
-                  child: Text(l10n.menuView),
-                ),
-              ],
+                          MenuItemButton(
+                            onPressed: activeSpace != null ? exportCurrent : null,
+                            shortcut: const SingleActivator(
+                                LogicalKeyboardKey.keyE, control: true),
+                            child: Text(
+                              activeSpace != null
+                                  ? l10n.menuExportCurrentSpace(activeSpace.name)
+                                  : l10n.menuExportCurrentSpaceFallback,
+                            ),
+                          ),
+                        ],
+                        child: Text(l10n.menuExportOpml),
+                      ),
+                    ],
+                    child: Text(l10n.menuFile),
+                  ),
+                  SubmenuButton(
+                    menuChildren: [
+                      MenuItemButton(
+                        onPressed: refreshAll,
+                        shortcut: const SingleActivator(
+                            LogicalKeyboardKey.keyR, control: true),
+                        child: Text(l10n.menuRefreshAll),
+                      ),
+                    ],
+                    child: Text(l10n.menuView),
+                  ),
+                ],
+              ),
             ),
             Expanded(child: child),
           ],
