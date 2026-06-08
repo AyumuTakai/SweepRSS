@@ -1,2 +1,18 @@
-app_name: "SweepRSS"
-bundle_id: "jp.hackwork.rssreader"
+# macos/packaging/dmg/make_config.yaml
+
+# DMGのタイトル（マウントした時に表示される名前）
+title: "SweepRSS"
+# DMG内のアイコンサイズ
+icon_size: 128
+# 背景画像を指定したい場合（不要ならコメントアウトまたは削除）
+# background: "macos/packaging/dmg/background.png"
+
+# DMGウィンドウ内でのアイコンの配置座標
+contents:
+  - x: 192
+    y: 344
+    type: "file"
+  - x: 448
+    y: 344
+    type: "link"
+    path: "/Applications"

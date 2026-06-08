@@ -1,0 +1,10 @@
+# linux/packaging/appimage/make_config.yaml
+
+# デスクトップエントリの表示名
+name: "SweepRSS"
+# アプリケーションのアイコン（linux/flutter/assets/ などにあるアイコン画像を指定）
+# ※まだ用意していない場合は、プロジェクト内の適切なアイコンパスに変更してください
+icon: "linux/flutter/assets/ic_launcher.png"
+# アプリのカテゴリ（必須）
+categories:
+  - "Utility"
