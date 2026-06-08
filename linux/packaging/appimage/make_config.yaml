@@ -13,3 +13,7 @@ icon: "linux/flutter/assets/ic_launcher.png"
 # アプリのカテゴリ
 categories:
   - "Utility"
+app_name: "SweepRSS"
+bundle_id: "jp.hackwork.sweeprss"
+version: "0.3.2"
+description: "SweepRSS - cross-platform RSS reader"
