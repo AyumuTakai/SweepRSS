@@ -1,90 +1,93 @@
 # SweepRSS
 
-クロスプラットフォーム対応のRSSリーダーアプリです。Flutter製。
+[日本語版はこちら](README.ja.md)
 
-## スクリーンショット
+A cross-platform RSS reader built with Flutter.
 
-![macOS Version](./resources/screenshot.jpg)
+## Screenshot
 
-## 機能
+![macOS Version](resources/screenshot.jpg)
 
-- **スペース**: 「仕事」「趣味」など目的別にフォルダセットを切り替え。スペースごとに記事一覧も独立
-- **フィード管理**: RSS / Atom / JSON Feed に対応。フィードの追加・編集・削除
-- **フォルダ整理**: フォルダでフィードを整理。ドラッグ&ドロップでフォルダ間移動・並び替え
-- **記事一覧**: 未読・フラグ付き・すべて・フォルダ・フィード単位での絞り込み表示
-- **記事表示**: WebView によるリッチな記事レンダリング
-- **フォルダ開閉の永続化**: アプリ再起動後もフォルダの開閉状態を維持
-- **ゴミ箱**: 削除したフィードをゴミ箱に移動。右クリックで復元または完全削除
-- **自動更新**: バックグラウンドでのフィード自動取得（60秒間隔）
-- **OPML インポート / エクスポート**: 全スペースまたは現在のスペース単位でエクスポート。他のRSSリーダーとの互換性あり
-- **セキュリティ**: SSRF防止・HTMLサニタイズ
+## Features
 
-## 対応プラットフォーム
+- **Spaces**: Switch between named workspaces (e.g. "Work", "Hobbies") — each space has its own folders and article feed
+- **Feed management**: RSS / Atom / JSON Feed support. Add, edit, and delete feeds
+- **Folder organization**: Organize feeds into folders. Drag and drop to move or reorder
+- **Article list**: Filter by unread, flagged, all, folder, or individual feed
+- **Article reader**: Rich article rendering via WebView
+- **Persistent folder state**: Folder expand/collapse state survives app restarts
+- **Trash**: Soft-delete feeds to the Trash. Right-click to restore or permanently delete
+- **Auto-refresh**: Background feed polling every 60 seconds
+- **OPML import / export**: Export all spaces or the current space. Compatible with other RSS readers
+- **Internationalization**: English and Japanese UI
+- **Security**: SSRF prevention and HTML sanitization
 
-| プラットフォーム | 状態 |
+## Supported Platforms
+
+| Platform | Status |
 |---|---|
-| macOS | ✅ 動作確認済み |
-| iOS | 🔧 対応予定 |
-| Android | 🔧 対応予定 |
-| Windows | 🔧 対応予定 |
-| Linux | 🔧 対応予定 |
+| macOS | ✅ Verified |
+| iOS | 🔧 Planned |
+| Android | 🔧 Planned |
+| Windows | 🔧 Planned |
+| Linux | 🔧 Planned |
 
-## 技術スタック
+## Tech Stack
 
-| カテゴリ | ライブラリ |
+| Category | Library |
 |---|---|
-| フレームワーク | Flutter 3.44 / Dart 3.12 |
-| 状態管理 | Riverpod 2.6 |
-| データベース | drift 2.28 (SQLite) |
+| Framework | Flutter 3.44 / Dart 3.12 |
+| State management | Riverpod 2.6 |
+| Database | drift 2.28 (SQLite) |
 | WebView | flutter_inappwebview 6.1 |
-| RSSパース | webfeed_plus |
+| RSS parsing | webfeed_plus |
 | HTTP | dio |
 | OPML | xml |
 
-## セットアップ
+## Setup
 
-### 必要環境
+### Requirements
 
-- Flutter 3.44 以上
-- macOS 13 以上（macOS ビルドの場合）
-- Xcode 15 以上（macOS / iOS ビルドの場合）
+- Flutter 3.44 or later
+- macOS 13 or later (for macOS builds)
+- Xcode 15 or later (for macOS / iOS builds)
 
-### ビルド手順
+### Build
 
 ```bash
-# 依存パッケージの取得
+# Install dependencies
 flutter pub get
 
-# macOS で起動
+# Run on macOS
 flutter run -d macos
 
-# コード生成（drift / Riverpod）
+# Code generation (drift / Riverpod)
 flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
-## プロジェクト構成
+## Project Structure
 
 ```
 lib/
 ├── main.dart
 ├── app.dart                          # MaterialApp + PlatformMenuBar
 ├── core/
-│   ├── database/                     # drift ORM (テーブル・DAO・マイグレーション)
-│   │   ├── tables/                   # Spaces・Folders・Feeds・Entries テーブル定義
-│   │   └── daos/                     # SpacesDao・FoldersDao・FeedsDao・EntriesDao
+│   ├── database/                     # drift ORM (tables, DAOs, migrations)
+│   │   ├── tables/                   # Spaces, Folders, Feeds, Entries table definitions
+│   │   └── daos/                     # SpacesDao, FoldersDao, FeedsDao, EntriesDao
 │   ├── models/                       # Selection sealed class
-│   └── services/                     # RSS取得・OPMLパース・URLバリデーション・HTMLサニタイズ
+│   └── services/                     # RSS fetch, OPML parse, URL validation, HTML sanitize
 ├── features/
-│   ├── sidebar/widgets/              # サイドバーパネル・スペーススイッチャー・フォルダ/フィードタイル
-│   ├── articles/                     # 記事一覧パネル
-│   ├── reader/                       # WebViewリーダーパネル
-│   ├── dialogs/                      # フィード追加・編集・フォルダ管理・スペース管理ダイアログ
-│   └── opml/                         # OPMLインポート/エクスポートプロバイダー
+│   ├── sidebar/widgets/              # Sidebar panel, space switcher, folder/feed tiles
+│   ├── articles/                     # Article list panel
+│   ├── reader/                       # WebView reader panel
+│   ├── dialogs/                      # Add/edit feed, folder manager, space manager dialogs
+│   └── opml/                         # OPML import/export provider
 └── shared/
-    ├── providers/                    # DB・スペース状態・選択状態・フォルダ開閉・更新タイマー
-    └── widgets/                      # アダプティブレイアウト・トースト通知
+    ├── providers/                    # DB, space state, selection, folder expand, refresh timer
+    └── widgets/                      # Adaptive layout, toast notifications
 ```
 
-## ライセンス
+## License
 
 MIT License
