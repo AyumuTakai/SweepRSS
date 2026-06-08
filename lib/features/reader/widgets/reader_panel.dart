@@ -100,17 +100,19 @@ class _ReaderContent extends StatelessWidget {
   }
 }
 
+// ── 共通ユーティリティ ────────────────────────────────────────────────────────
+
+/// http / https 以外のスキームを launchUrl に渡さないようフィルタする。
+bool _isSafeUrl(String url) {
+  final uri = Uri.tryParse(url);
+  return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
+}
+
 // ── URL を WebView でロード ────────────────────────────────────────────────────
 
 class _UrlView extends ConsumerWidget {
   final String url;
   const _UrlView({required this.url});
-
-  /// http / https 以外のスキームを launchUrl に渡さないようフィルタする。
-  static bool _isSafeUrl(String url) {
-    final uri = Uri.tryParse(url);
-    return uri != null && (uri.scheme == 'http' || uri.scheme == 'https');
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -240,7 +242,7 @@ class _ExternalBrowserPrompt extends StatelessWidget {
           FilledButton.icon(
             icon: const Icon(Icons.open_in_new, size: 16),
             label: Text(AppLocalizations.of(context).readerOpenInBrowser),
-            onPressed: _UrlView._isSafeUrl(link)
+            onPressed: _isSafeUrl(link)
                 ? () => launchUrl(Uri.parse(link),
                     mode: LaunchMode.externalApplication)
                 : null,
@@ -296,7 +298,7 @@ class _ReaderToolbar extends ConsumerWidget {
                   .toggleFlag(articleId, !flagged);
             },
           ),
-          if (link != null && _UrlView._isSafeUrl(link!))
+          if (link != null && _isSafeUrl(link!))
             IconButton(
               icon: const Icon(Icons.open_in_new, size: 18),
               tooltip: AppLocalizations.of(context).readerOpenInBrowserTooltip,
