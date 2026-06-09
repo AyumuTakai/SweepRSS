@@ -154,7 +154,7 @@ class _ArticlesList extends ConsumerWidget {
 
 // ── 記事タイル ─────────────────────────────────────────────────────────────────
 
-class _ArticleTile extends StatelessWidget {
+class _ArticleTile extends ConsumerWidget {
   final Entry entry;
   final bool isSelected;
   final VoidCallback onTap;
@@ -166,10 +166,12 @@ class _ArticleTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onTap,
+      onSecondaryTapDown: (details) =>
+          _showContextMenu(context, ref, details.globalPosition),
       child: Container(
         color: isSelected
             ? theme.colorScheme.primaryContainer
@@ -220,6 +222,40 @@ class _ArticleTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showContextMenu(
+      BuildContext context, WidgetRef ref, Offset position) {
+    final l10n = AppLocalizations.of(context);
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+          position.dx, position.dy, position.dx + 1, position.dy + 1),
+      items: [
+        PopupMenuItem(
+          child: ListTile(
+            dense: true,
+            leading: Icon(
+              entry.unread ? Icons.done : Icons.mail_outline,
+              size: 16,
+            ),
+            title: Text(entry.unread
+                ? AppLocalizations.of(context).articleContextMarkAsRead
+                : AppLocalizations.of(context).articleContextMarkAsUnread),
+            contentPadding: EdgeInsets.zero,
+          ),
+          onTap: () => Future.microtask(() async {
+            final db = ref.read(databaseProvider);
+            if (entry.unread) {
+              await db.entriesDao.markRead(entry.id);
+            } else {
+              await db.entriesDao.markUnread(entry.id);
+            }
+            ref.invalidate(articlesProvider);
+          }),
+        ),
+      ],
     );
   }
 }

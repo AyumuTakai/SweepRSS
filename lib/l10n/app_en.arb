@@ -164,6 +164,12 @@
   "articleNoTitle": "(No title)",
   "@articleNoTitle": { "description": "Article tile: placeholder when entry has no title" },
 
+  "articleContextMarkAsRead": "Mark as Read",
+  "@articleContextMarkAsRead": { "description": "Article context menu: mark article as read" },
+
+  "articleContextMarkAsUnread": "Mark as Unread",
+  "@articleContextMarkAsUnread": { "description": "Article context menu: mark article as unread" },
+
   "readerSelectArticle": "Select an article",
   "@readerSelectArticle": { "description": "Reader panel empty state" },
 

@@ -44,6 +44,8 @@
   "articleSearchHint": "記事を検索...",
   "articleTrashGuide": "ゴミ箱のフィードはサイドバーで\n右クリックして操作できます",
   "articleNoTitle": "(タイトルなし)",
+  "articleContextMarkAsRead": "既読にする",
+  "articleContextMarkAsUnread": "未読にする",
   "readerSelectArticle": "記事を選択してください",
   "readerNoContent": "コンテンツがありません",
   "readerExternalBrowserPrompt": "このサイトは外部ブラウザで表示する必要があります",
