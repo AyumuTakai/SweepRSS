@@ -394,6 +394,19 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
       error: (_, _) => [],
     );
 
+    // ゴミ箱内の記事の未読数をカウント
+    final articlesAsync = ref.watch(articlesProvider);
+    final trashedUnreadCount = articlesAsync.when(
+      data: (articles) {
+        final trashedFeedIds = feeds.map((f) => f.id).toSet();
+        return articles
+            .where((a) => trashedFeedIds.contains(a.feedId) && a.unread)
+            .length;
+      },
+      loading: () => 0,
+      error: (_, _) => 0,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -408,7 +421,7 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (feeds.isNotEmpty)
+              if (trashedUnreadCount > 0)
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -417,7 +430,7 @@ class _TrashTileState extends ConsumerState<_TrashTile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${feeds.length}',
+                    '$trashedUnreadCount',
                     style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,

@@ -31,6 +31,7 @@
   "trashContextDeletePermanently": "完全削除",
   "trashDeleteDialogTitle": "「{title}」を完全削除",
   "trashDeleteDialogBody": "フィードとすべての記事を完全に削除します。\nこの操作は取り消せません。",
+  "folderContextMarkAllAsRead": "すべて既読に",
   "folderContextRename": "リネーム",
   "folderContextDelete": "削除",
   "folderRenameDialogTitle": "フォルダをリネーム",

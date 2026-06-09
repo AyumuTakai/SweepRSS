@@ -170,6 +170,17 @@ class FolderTile extends ConsumerWidget {
         PopupMenuItem(
           child: ListTile(
             dense: true,
+            leading: const Icon(Icons.done_all, size: 16),
+            title: Text(l10n.folderContextMarkAllAsRead),
+            contentPadding: EdgeInsets.zero,
+          ),
+          onTap: () => Future.microtask(() {
+            if (context.mounted) _markAllAsRead(ref);
+          }),
+        ),
+        PopupMenuItem(
+          child: ListTile(
+            dense: true,
             leading: const Icon(Icons.drive_file_rename_outline, size: 16),
             title: Text(l10n.folderContextRename),
             contentPadding: EdgeInsets.zero,
@@ -193,6 +204,15 @@ class FolderTile extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _markAllAsRead(WidgetRef ref) async {
+    final feedsInSubtree = _feedsInSubtree(folder.id);
+    final db = ref.read(databaseProvider);
+    for (final feed in feedsInSubtree) {
+      await db.entriesDao.markAllReadForFeed(feed.id);
+    }
+    ref.invalidate(articlesProvider);
   }
 
   Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {

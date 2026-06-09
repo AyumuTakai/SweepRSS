@@ -120,6 +120,9 @@
   "trashDeleteDialogBody": "This will permanently delete the feed and all its articles.\nThis action cannot be undone.",
   "@trashDeleteDialogBody": { "description": "Confirm permanent delete dialog body" },
 
+  "folderContextMarkAllAsRead": "Mark All as Read",
+  "@folderContextMarkAllAsRead": { "description": "Folder context menu: Mark all articles as read" },
+
   "folderContextRename": "Rename",
   "@folderContextRename": { "description": "Folder context menu: Rename" },
 
