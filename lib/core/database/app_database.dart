@@ -78,15 +78,15 @@ class AppDatabase extends _$AppDatabase {
       );
 
   static QueryExecutor _openConnection() {
-    return driftDatabase(name: 'rssreader');
+    return driftDatabase(name: 'sweeprss');
   }
 
   static Future<AppDatabase> create() async {
     final dir = await getApplicationSupportDirectory();
-    final dbPath = p.join(dir.path, 'rssreader.db');
+    final dbPath = p.join(dir.path, 'sweeprss.db');
     return AppDatabase(
       driftDatabase(
-          name: 'rssreader',
+          name: 'sweeprss',
           native: DriftNativeOptions(databasePath: () async => dbPath)),
     );
   }

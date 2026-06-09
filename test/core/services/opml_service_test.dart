@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rssreader/core/database/app_database.dart';
-import 'package:rssreader/core/services/opml_service.dart';
+import 'package:sweeprss/core/database/app_database.dart';
+import 'package:sweeprss/core/services/opml_service.dart';
 
 /// テスト用インメモリ DB を生成する
 AppDatabase _makeTestDb() => AppDatabase(NativeDatabase.memory());

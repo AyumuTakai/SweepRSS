@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rssreader/core/services/html_sanitizer.dart';
+import 'package:sweeprss/core/services/html_sanitizer.dart';
 
 void main() {
   group('HtmlSanitizer.sanitize', () {

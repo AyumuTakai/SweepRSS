@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rssreader/core/services/url_validator.dart';
+import 'package:sweeprss/core/services/url_validator.dart';
 
 void main() {
   group('UrlValidator.validate', () {
