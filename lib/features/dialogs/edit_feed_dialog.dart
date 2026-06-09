@@ -17,12 +17,14 @@ class EditFeedDialog extends ConsumerStatefulWidget {
 class _EditFeedDialogState extends ConsumerState<EditFeedDialog> {
   late final TextEditingController _titleController;
   late bool _requiresExternalBrowser;
+  late bool _useRssContent;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.feed.title ?? '');
     _requiresExternalBrowser = widget.feed.requiresExternalBrowser;
+    _useRssContent = widget.feed.useRssContent;
   }
 
   @override
@@ -39,6 +41,9 @@ class _EditFeedDialogState extends ConsumerState<EditFeedDialog> {
     }
     if (_requiresExternalBrowser != widget.feed.requiresExternalBrowser) {
       await db.feedsDao.setRequiresExternalBrowser(widget.feed.id, _requiresExternalBrowser);
+    }
+    if (_useRssContent != widget.feed.useRssContent) {
+      await db.feedsDao.setUseRssContent(widget.feed.id, _useRssContent);
     }
     if (mounted) {
       ref
@@ -71,6 +76,15 @@ class _EditFeedDialogState extends ConsumerState<EditFeedDialog> {
               value: _requiresExternalBrowser,
               onChanged: (v) =>
                   setState(() => _requiresExternalBrowser = v ?? false),
+            ),
+            CheckboxListTile(
+              title: Text(l10n.editFeedUseRssContentLabel,
+                  style: const TextStyle(fontSize: 13)),
+              subtitle: Text(l10n.editFeedUseRssContentSubtitle,
+                  style: const TextStyle(fontSize: 11)),
+              value: _useRssContent,
+              onChanged: (v) =>
+                  setState(() => _useRssContent = v ?? true),
             ),
             const SizedBox(height: 8),
             Row(

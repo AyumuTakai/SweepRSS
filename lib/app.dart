@@ -1,9 +1,11 @@
-import 'dart:io' show Platform, exit;
+import 'dart:io' show Platform, exit, File;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import 'features/opml/opml_import_provider.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -73,6 +75,43 @@ class _AppShell extends ConsumerWidget {
         exit(0);
       } else {
         SystemNavigator.pop();
+      }
+    }
+
+    Future<void> resetDatabase() async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.resetDatabaseDialogTitle),
+          content: Text(l10n.resetDatabaseDialogBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.dialogCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.resetDatabaseDialogReset),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        try {
+          final dir = await getApplicationSupportDirectory();
+          final dbFile = File(p.join(dir.path, 'sweeprss.db'));
+          if (await dbFile.exists()) {
+            await dbFile.delete();
+          }
+          exit(0);
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: $e')),
+            );
+          }
+        }
       }
     }
 
@@ -148,6 +187,12 @@ class _AppShell extends ConsumerWidget {
                   ],
                 ),
               ]),
+              PlatformMenuItemGroup(members: [
+                PlatformMenuItem(
+                  label: l10n.menuResetDatabase,
+                  onSelected: () => resetDatabase(),
+                ),
+              ]),
             ],
           ),
           PlatformMenu(
@@ -221,6 +266,45 @@ class _WinLinuxMenuBar extends ConsumerWidget {
 
     void refreshAll() => ref.read(refreshProvider.notifier).refreshAll();
 
+    Future<void> resetDatabase() async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.resetDatabaseDialogTitle),
+          content: Text(l10n.resetDatabaseDialogBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(l10n.dialogCancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(l10n.resetDatabaseDialogReset),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        try {
+          final dir = await getApplicationSupportDirectory();
+          final dbFile = File(p.join(dir.path, 'sweeprss.db'));
+          if (await dbFile.exists()) {
+            await dbFile.delete();
+          }
+          if (context.mounted) {
+            exit(0);
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: $e')),
+            );
+          }
+        }
+      }
+    }
+
     return CallbackShortcuts(
       bindings: {
         SingleActivator(LogicalKeyboardKey.keyI, control: true): importOpml,
@@ -291,6 +375,11 @@ class _WinLinuxMenuBar extends ConsumerWidget {
                           ),
                         ],
                         child: Text(l10n.menuExportOpml),
+                      ),
+                      const Divider(height: 8),
+                      MenuItemButton(
+                        onPressed: () => resetDatabase(),
+                        child: Text(l10n.menuResetDatabase),
                       ),
                     ],
                     child: Text(l10n.menuFile),

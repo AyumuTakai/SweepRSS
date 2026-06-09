@@ -10,6 +10,9 @@
   "menuFile": "File",
   "@menuFile": { "description": "macOS menu: File menu label" },
 
+  "menuResetDatabase": "Reset Database",
+  "@menuResetDatabase": { "description": "Menu: Reset database" },
+
   "menuImportOpml": "Import OPML...",
   "@menuImportOpml": { "description": "macOS menu: Import OPML" },
 
@@ -206,6 +209,15 @@
   "dialogChange": "Change",
   "@dialogChange": { "description": "Generic change/rename confirm button" },
 
+  "resetDatabaseDialogTitle": "Reset Database",
+  "@resetDatabaseDialogTitle": { "description": "Reset database confirmation dialog title" },
+
+  "resetDatabaseDialogBody": "⚠️ WARNING: This will permanently delete all stored data including feeds, articles, and settings.\n\nThis action CANNOT be undone. The app will close. Please restart it after exiting.\n\nAre you sure you want to continue?",
+  "@resetDatabaseDialogBody": { "description": "Reset database confirmation dialog body" },
+
+  "resetDatabaseDialogReset": "Reset",
+  "@resetDatabaseDialogReset": { "description": "Reset database dialog reset button" },
+
   "dialogDelete": "Delete",
   "@dialogDelete": { "description": "Generic delete confirm button" },
 
@@ -243,6 +255,12 @@
 
   "editFeedExternalBrowserSubtitle": "For JS-heavy sites",
   "@editFeedExternalBrowserSubtitle": { "description": "Edit feed: external browser checkbox subtitle" },
+
+  "editFeedUseRssContentLabel": "Use RSS content",
+  "@editFeedUseRssContentLabel": { "description": "Edit feed: use RSS content checkbox label" },
+
+  "editFeedUseRssContentSubtitle": "Display RSS feed content instead of webpage",
+  "@editFeedUseRssContentSubtitle": { "description": "Edit feed: use RSS content checkbox subtitle" },
 
   "folderManagerDialogTitle": "Manage Folders",
   "@folderManagerDialogTitle": { "description": "Folder manager dialog title" },

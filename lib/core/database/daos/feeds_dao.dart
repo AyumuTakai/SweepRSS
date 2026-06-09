@@ -78,6 +78,12 @@ class FeedsDao extends DatabaseAccessor<AppDatabase> with _$FeedsDaoMixin {
     );
   }
 
+  Future<void> setUseRssContent(String id, bool value) {
+    return (update(feeds)..where((f) => f.id.equals(id))).write(
+      FeedsCompanion(useRssContent: Value(value)),
+    );
+  }
+
   Future<void> updateFetchStatus(String id, {String? error}) {
     return (update(feeds)..where((f) => f.id.equals(id))).write(
       FeedsCompanion(

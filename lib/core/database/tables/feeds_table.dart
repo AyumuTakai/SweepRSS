@@ -12,6 +12,8 @@ class Feeds extends Table {
   TextColumn get folderId => text().nullable()();
   BoolColumn get requiresExternalBrowser =>
       boolean().withDefault(const Constant(false))();
+  BoolColumn get useRssContent =>
+      boolean().withDefault(const Constant(true))();
   TextColumn get spaceId => text().nullable()();
   TextColumn get lastFetchError => text().nullable()();
   DateTimeColumn get lastFetchAt => dateTime().nullable()();
