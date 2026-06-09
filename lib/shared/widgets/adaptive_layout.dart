@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,6 +24,7 @@ class AdaptiveLayout extends ConsumerStatefulWidget {
 
 class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   double _articlesWidth = 320;
+  double _articlesHeight = 300;
 
   @override
   void initState() {
@@ -214,11 +217,21 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    return width > 900 ? _buildDesktop() : _buildMobile();
+    final isDesktopPlatform = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+    return isDesktopPlatform ? _buildDesktop() : _buildMobile();
   }
 
   Widget _buildDesktop() {
+    final width = MediaQuery.of(context).size.width;
+
+    if (width > 1600) {
+      return _buildThreeColumnLayout();
+    } else {
+      return _buildTwoColumnLayout();
+    }
+  }
+
+  Widget _buildThreeColumnLayout() {
     return Row(
       children: [
         const SidebarPanel(),
@@ -244,6 +257,42 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
           ),
         ),
         const Expanded(child: ReaderPanel()),
+      ],
+    );
+  }
+
+  Widget _buildTwoColumnLayout() {
+    return Row(
+      children: [
+        const SidebarPanel(),
+        const VerticalDivider(width: 1),
+        Expanded(
+          child: Column(
+            children: [
+              SizedBox(
+                height: _articlesHeight,
+                child: const ArticlesPanel(),
+              ),
+              MouseRegion(
+                cursor: SystemMouseCursors.resizeRow,
+                child: GestureDetector(
+                  onVerticalDragUpdate: (d) {
+                    setState(() {
+                      _articlesHeight =
+                          (_articlesHeight + d.delta.dy).clamp(100, 500);
+                    });
+                  },
+                  child: Container(
+                    height: 5,
+                    color: Colors.transparent,
+                    child: const Divider(height: 1),
+                  ),
+                ),
+              ),
+              const Expanded(child: ReaderPanel()),
+            ],
+          ),
+        ),
       ],
     );
   }
