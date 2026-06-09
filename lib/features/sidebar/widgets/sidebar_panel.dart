@@ -103,7 +103,6 @@ class SidebarPanel extends ConsumerWidget {
                     ? refreshState.done / refreshState.total
                     : null,
               ),
-            _SidebarFooter(),
           ],
         ),
       ),
@@ -122,12 +121,23 @@ class _SidebarHeader extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
         children: [
-          const Expanded(
-            child: Text(
-              'SweepRSS',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          IconButton(
+            icon: const Icon(Icons.add, size: 18),
+            tooltip: AppLocalizations.of(context).sidebarAddFeedTooltip,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => const AddFeedDialog(),
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.create_new_folder_outlined, size: 18),
+            tooltip: AppLocalizations.of(context).sidebarManageFoldersTooltip,
+            onPressed: () => showDialog(
+              context: context,
+              builder: (_) => const FolderManagerDialog(),
+            ),
+          ),
+          const Spacer(),
           IconButton(
             icon: isRefreshing
                 ? const SizedBox(
