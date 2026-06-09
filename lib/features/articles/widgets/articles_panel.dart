@@ -8,6 +8,7 @@ import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/providers/database_provider.dart';
 import '../../../shared/providers/reader_controller_provider.dart';
 import '../../../shared/providers/selection_provider.dart';
+import '../../../shared/utils/article_tile_dimensions.dart';
 import '../providers/articles_provider.dart';
 
 // currentArticleIdProvider は ArticlesPanel でまとめて watch し _ArticlesList へ渡す
@@ -125,8 +126,11 @@ class _ArticlesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scrollController = ref.watch(articlesScrollControllerProvider);
+    final itemHeight = getArticleItemHeight();
+
     return ListView.builder(
       controller: scrollController,
+      itemExtent: itemHeight,
       itemCount: articles.length,
       itemBuilder: (context, i) {
         final entry = articles[i];

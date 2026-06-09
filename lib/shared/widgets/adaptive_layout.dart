@@ -14,6 +14,7 @@ import '../../features/sidebar/widgets/sidebar_panel.dart';
 import '../providers/database_provider.dart';
 import '../providers/reader_controller_provider.dart';
 import '../providers/selection_provider.dart';
+import '../utils/article_tile_dimensions.dart';
 
 class AdaptiveLayout extends ConsumerStatefulWidget {
   const AdaptiveLayout({super.key});
@@ -104,7 +105,8 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
     }
 
     try {
-      final atBottom = await controller.evaluateJavascript(source: '''
+      final atBottom = await controller.evaluateJavascript(
+        source: '''
         (() => {
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
           const windowHeight = window.innerHeight;
@@ -116,7 +118,8 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
           window.scrollBy({ top: 400, behavior: 'smooth' });
           return false;
         })()
-      ''');
+      ''',
+      );
       if (!mounted) return;
       if (atBottom == true) _selectNextUnread();
     } catch (_) {
@@ -173,8 +176,9 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
     if (articles == null || articles.isEmpty) return;
 
     final currentId = ref.read(currentArticleIdProvider);
-    final currentIndex =
-        currentId == null ? -1 : articles.indexWhere((a) => a.id == currentId);
+    final currentIndex = currentId == null
+        ? -1
+        : articles.indexWhere((a) => a.id == currentId);
 
     for (int i = currentIndex + 1; i < articles.length; i++) {
       if (articles[i].unread) {
@@ -202,10 +206,13 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   void _scrollArticlesTo(int index) {
     final sc = ref.read(articlesScrollControllerProvider);
     if (!sc.hasClients) return;
-    // ArticleTile の推定高さ（padding 16px + テキスト ~21px = ~37px）
-    const estimatedItemHeight = 37.0;
-    final target =
-        (index * estimatedItemHeight).clamp(0.0, sc.position.maxScrollExtent);
+    final itemHeight = getArticleItemHeight();
+    // ツールバー高さ分をマイナスオフセットで指定
+    const toolbarHeight = 40.0;
+    final target = ((index * itemHeight) - toolbarHeight).clamp(
+      0.0,
+      sc.position.maxScrollExtent,
+    );
     sc.animateTo(
       target,
       duration: const Duration(milliseconds: 150),
@@ -217,7 +224,8 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktopPlatform = Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+    final isDesktopPlatform =
+        Platform.isMacOS || Platform.isWindows || Platform.isLinux;
     return isDesktopPlatform ? _buildDesktop() : _buildMobile();
   }
 
@@ -236,17 +244,13 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
       children: [
         const SidebarPanel(),
         const VerticalDivider(width: 1),
-        SizedBox(
-          width: _articlesWidth,
-          child: const ArticlesPanel(),
-        ),
+        SizedBox(width: _articlesWidth, child: const ArticlesPanel()),
         MouseRegion(
           cursor: SystemMouseCursors.resizeColumn,
           child: GestureDetector(
             onHorizontalDragUpdate: (d) {
               setState(() {
-                _articlesWidth =
-                    (_articlesWidth + d.delta.dx).clamp(200, 600);
+                _articlesWidth = (_articlesWidth + d.delta.dx).clamp(200, 600);
               });
             },
             child: Container(
@@ -269,17 +273,16 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
         Expanded(
           child: Column(
             children: [
-              SizedBox(
-                height: _articlesHeight,
-                child: const ArticlesPanel(),
-              ),
+              SizedBox(height: _articlesHeight, child: const ArticlesPanel()),
               MouseRegion(
                 cursor: SystemMouseCursors.resizeRow,
                 child: GestureDetector(
                   onVerticalDragUpdate: (d) {
                     setState(() {
-                      _articlesHeight =
-                          (_articlesHeight + d.delta.dy).clamp(100, 500);
+                      _articlesHeight = (_articlesHeight + d.delta.dy).clamp(
+                        100,
+                        500,
+                      );
                     });
                   },
                   child: Container(
@@ -317,25 +320,24 @@ class _MobileLayoutState extends State<_MobileLayout> {
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [
-          SidebarPanel(),
-          ArticlesPanel(),
-          ReaderPanel(),
-        ],
+        children: const [SidebarPanel(), ArticlesPanel(), ReaderPanel()],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (i) => setState(() => _selectedIndex = i),
         destinations: [
           NavigationDestination(
-              icon: const Icon(Icons.folder),
-              label: AppLocalizations.of(context).mobileNavFeeds),
+            icon: const Icon(Icons.folder),
+            label: AppLocalizations.of(context).mobileNavFeeds,
+          ),
           NavigationDestination(
-              icon: const Icon(Icons.list),
-              label: AppLocalizations.of(context).mobileNavArticles),
+            icon: const Icon(Icons.list),
+            label: AppLocalizations.of(context).mobileNavArticles,
+          ),
           NavigationDestination(
-              icon: const Icon(Icons.article),
-              label: AppLocalizations.of(context).mobileNavReader),
+            icon: const Icon(Icons.article),
+            label: AppLocalizations.of(context).mobileNavReader,
+          ),
         ],
       ),
     );
