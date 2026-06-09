@@ -16,7 +16,10 @@ class FolderManagerDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final foldersAsync = ref.watch(foldersStreamProvider);
+    final activeSpace = ref.watch(resolvedActiveSpaceProvider);
+    final foldersAsync = activeSpace != null
+        ? ref.watch(spaceFoldersStreamProvider(activeSpace.id))
+        : ref.watch(foldersStreamProvider);
 
     return AlertDialog(
       title: Text(l10n.folderManagerDialogTitle),
