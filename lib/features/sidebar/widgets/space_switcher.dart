@@ -16,7 +16,7 @@ class SpaceSwitcher extends ConsumerWidget {
     final spaces = spacesAsync.when(
       data: (data) => data,
       loading: () => [],
-      error: (_, __) => [],
+      error: (_, _) => [],
     );
     final activeSpace = ref.watch(resolvedActiveSpaceProvider);
 

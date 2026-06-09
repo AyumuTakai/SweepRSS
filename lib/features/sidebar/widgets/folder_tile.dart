@@ -58,7 +58,7 @@ class FolderTile extends ConsumerWidget {
       final count = countAsync.when(
         data: (data) => data,
         loading: () => 0,
-        error: (_, __) => 0,
+        error: (_, _) => 0,
       );
       return sum + count;
     });

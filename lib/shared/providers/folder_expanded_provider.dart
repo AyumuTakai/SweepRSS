@@ -40,7 +40,7 @@ class FolderExpandedNotifier extends AsyncNotifier<Map<String, bool>> {
     final current = state.when(
       data: (data) => data,
       loading: () => {},
-      error: (_, __) => {},
+      error: (_, _) => {},
     );
     final next = !(current[folderId] ?? true);
     state = AsyncData({...current, folderId: next});

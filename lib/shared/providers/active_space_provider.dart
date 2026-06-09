@@ -68,13 +68,13 @@ final resolvedActiveSpaceProvider = Provider<Space?>((ref) {
   final activeId = activeIdAsync.when(
     data: (data) => data,
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
   final spacesAsync = ref.watch(spacesStreamProvider);
   final spaces = spacesAsync.when(
     data: (data) => data,
     loading: () => [],
-    error: (_, __) => [],
+    error: (_, _) => [],
   );
   if (spaces.isEmpty) return null;
   return spaces.firstWhere(

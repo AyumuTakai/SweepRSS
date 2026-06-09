@@ -1,4 +1,4 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, exit;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -68,6 +68,14 @@ class _AppShell extends ConsumerWidget {
       ),
     );
 
+    void quitApp() {
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        exit(0);
+      } else {
+        SystemNavigator.pop();
+      }
+    }
+
     if (Platform.isMacOS) {
       return PlatformMenuBar(
         menus: [
@@ -87,7 +95,7 @@ class _AppShell extends ConsumerWidget {
                   label: l10n.menuQuit,
                   shortcut: const SingleActivator(LogicalKeyboardKey.keyQ,
                       meta: true),
-                  onSelected: SystemNavigator.pop,
+                  onSelected: quitApp,
                 ),
               ]),
             ],
@@ -203,6 +211,14 @@ class _WinLinuxMenuBar extends ConsumerWidget {
       }
     }
 
+    void quitApp() {
+      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+        exit(0);
+      } else {
+        SystemNavigator.pop();
+      }
+    }
+
     void refreshAll() => ref.read(refreshProvider.notifier).refreshAll();
 
     return CallbackShortcuts(
@@ -213,7 +229,7 @@ class _WinLinuxMenuBar extends ConsumerWidget {
         SingleActivator(LogicalKeyboardKey.keyE, control: true): exportCurrent,
         SingleActivator(LogicalKeyboardKey.keyR, control: true): refreshAll,
         SingleActivator(LogicalKeyboardKey.keyQ, control: true):
-            SystemNavigator.pop,
+            quitApp,
       },
       child: Focus(
         autofocus: true,
@@ -237,7 +253,7 @@ class _WinLinuxMenuBar extends ConsumerWidget {
                       ),
                       const Divider(),
                       MenuItemButton(
-                        onPressed: SystemNavigator.pop,
+                        onPressed: quitApp,
                         shortcut: const SingleActivator(
                             LogicalKeyboardKey.keyQ, control: true),
                         child: Text(l10n.menuQuit),

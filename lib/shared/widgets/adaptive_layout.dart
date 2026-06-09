@@ -145,7 +145,7 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
     final articles = articlesAsync.when(
       data: (data) => data,
       loading: () => null,
-      error: (_, __) => null,
+      error: (_, _) => null,
     );
     if (articles == null || articles.isEmpty) return;
 
@@ -165,7 +165,7 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
     final articles = articlesAsync.when(
       data: (data) => data,
       loading: () => null,
-      error: (_, __) => null,
+      error: (_, _) => null,
     );
     if (articles == null || articles.isEmpty) return;
 

@@ -29,6 +29,16 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+
+          final defaultId = const Uuid().v4();
+          await customInsert(
+            'INSERT INTO spaces (id, name, "order") VALUES (?, ?, 0)',
+            variables: [
+              Variable.withString(defaultId),
+              Variable.withString('デフォルト'),
+            ],
+            updates: {spaces},
+          );
         },
         onUpgrade: (m, from, to) async {
           if (from < 2) {

@@ -105,7 +105,7 @@ final currentArticleFeedProvider = FutureProvider<Feed?>((ref) async {
   final article = articleAsync.when(
     data: (data) => data,
     loading: () => null,
-    error: (_, __) => null,
+    error: (_, _) => null,
   );
   if (article == null) return null;
   return ref.read(databaseProvider).feedsDao.getFeedById(article.feedId);
@@ -125,7 +125,7 @@ final totalUnreadCountProvider = StreamProvider<int>((ref) {
   final feeds = feedsAsync.when(
     data: (data) => data,
     loading: () => [],
-    error: (_, __) => [],
+    error: (_, _) => [],
   );
   final foldersAsync = (activeSpace != null
           ? ref.watch(spaceFoldersStreamProvider(activeSpace.id))
@@ -133,7 +133,7 @@ final totalUnreadCountProvider = StreamProvider<int>((ref) {
   final folders = foldersAsync.when(
     data: (data) => data,
     loading: () => [],
-    error: (_, __) => [],
+    error: (_, _) => [],
   );
 
   final List<String> feedIds;
