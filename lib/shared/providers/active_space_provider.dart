@@ -16,8 +16,7 @@ final spacesStreamProvider = StreamProvider<List<Space>>((ref) {
   return db.spacesDao.watchAllSpaces();
 });
 
-final activeSpaceProvider =
-    AsyncNotifierProvider<ActiveSpaceNotifier, String?>(
+final activeSpaceProvider = AsyncNotifierProvider<ActiveSpaceNotifier, String?>(
   ActiveSpaceNotifier.new,
 );
 
@@ -62,23 +61,42 @@ class ActiveSpaceNotifier extends AsyncNotifier<String?> {
 
 /// アクティブスペースを spaces リストと突合した結果を返す派生プロバイダ。
 /// スペースが削除されていた場合はリストの先頭スペースへフォールバック。
-/// スペースがひとつも存在しない場合は null（全表示モード）を返す。
+/// スペースがひとつも存在しない場合は デフォルトスペースを作成して返す。
+class ResolvedActiveSpaceNotifier extends AsyncNotifier<Space?> {
+  @override
+  Future<Space?> build() async {
+    final activeIdAsync = ref.watch(activeSpaceProvider);
+    final activeId = activeIdAsync.when(
+      data: (data) => data,
+      loading: () => null,
+      error: (_, _) => null,
+    );
+
+    final spaces = await ref.watch(spacesStreamProvider.future);
+    if (spaces.isEmpty) {
+      // デフォルトスペースを作成
+      final db = ref.read(databaseProvider);
+      final newSpaceId = await db.spacesDao.insertSpace('デフォルト');
+      return Space(
+        id: newSpaceId,
+        name: 'デフォルト',
+        icon: '',
+        order: 0,
+      );
+    }
+
+    return spaces.firstWhere(
+      (space) => space.id == activeId,
+      orElse: () => spaces.first,
+    );
+  }
+}
+
+
+final resolvedActiveSpaceAsyncProvider = AsyncNotifierProvider<ResolvedActiveSpaceNotifier, Space?>(
+  ResolvedActiveSpaceNotifier.new,
+);
+
 final resolvedActiveSpaceProvider = Provider<Space?>((ref) {
-  final activeIdAsync = ref.watch(activeSpaceProvider);
-  final activeId = activeIdAsync.when(
-    data: (data) => data,
-    loading: () => null,
-    error: (_, _) => null,
-  );
-  final spacesAsync = ref.watch(spacesStreamProvider);
-  final spaces = spacesAsync.when(
-    data: (data) => data,
-    loading: () => [],
-    error: (_, _) => [],
-  );
-  if (spaces.isEmpty) return null;
-  return spaces.firstWhere(
-    (s) => s.id == activeId,
-    orElse: () => spaces.first,
-  );
+  return ref.watch(resolvedActiveSpaceAsyncProvider).value;
 });
