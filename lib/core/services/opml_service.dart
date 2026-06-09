@@ -6,6 +6,7 @@ import 'package:xml/xml.dart';
 
 import '../database/app_database.dart';
 import 'url_validator.dart';
+import 'dart:convert';
 
 class OpmlService {
   final AppDatabase _db;
@@ -14,14 +15,17 @@ class OpmlService {
   OpmlService(this._db);
 
   Future<String?> pickOpmlFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['opml', 'xml'],
     );
     return result?.files.single.path;
   }
 
-  Future<OpmlImportResult> importFromFile(String path, {String? spaceId}) async {
+  Future<OpmlImportResult> importFromFile(
+    String path, {
+    String? spaceId,
+  }) async {
     final content = await File(path).readAsString();
     return importFromString(content, spaceId: spaceId);
   }
@@ -34,8 +38,10 @@ class OpmlService {
   /// - 再帰深度は最大 [_maxImportDepth] に制限し、スタックオーバーフローを防ぐ。
   static const int _maxImportDepth = 20;
 
-  Future<OpmlImportResult> importFromString(String opmlContent,
-      {String? spaceId}) async {
+  Future<OpmlImportResult> importFromString(
+    String opmlContent, {
+    String? spaceId,
+  }) async {
     final doc = XmlDocument.parse(opmlContent);
     final body = doc.findAllElements('body').firstOrNull;
     if (body == null) throw const OpmlException('OPML body が見つかりません');
@@ -61,7 +67,8 @@ class OpmlService {
 
         for (final outline in outlines) {
           final xmlUrl = outline.getAttribute('xmlUrl');
-          final title = outline.getAttribute('title') ??
+          final title =
+              outline.getAttribute('title') ??
               outline.getAttribute('text') ??
               '';
 
@@ -73,13 +80,15 @@ class OpmlService {
             if (existingUrls.contains(xmlUrl)) continue;
             try {
               final feedId = _uuid.v4();
-              await _db.feedsDao.insertFeed(FeedsCompanion.insert(
-                id: feedId,
-                url: xmlUrl,
-                title: Value(title.isNotEmpty ? title : null),
-                folderId: Value(parentFolderId),
-                spaceId: Value(currentSpaceId),
-              ));
+              await _db.feedsDao.insertFeed(
+                FeedsCompanion.insert(
+                  id: feedId,
+                  url: xmlUrl,
+                  title: Value(title.isNotEmpty ? title : null),
+                  folderId: Value(parentFolderId),
+                  spaceId: Value(currentSpaceId),
+                ),
+              );
               existingUrls.add(xmlUrl); // 同一 OPML 内の重複も防ぐ
               newFeedIds.add(feedId);
               feedCount++;
@@ -89,8 +98,7 @@ class OpmlService {
           } else if (outline.getAttribute('sweepType') == 'space') {
             // マルチスペース OPML: スペースを作成して配下を処理
             final spaceName = title.isNotEmpty ? title : 'Untitled Space';
-            final newSpaceId =
-                await _db.spacesDao.insertSpace(spaceName);
+            final newSpaceId = await _db.spacesDao.insertSpace(spaceName);
             await processOutlines(
               outline.findElements('outline'),
               null,
@@ -100,13 +108,15 @@ class OpmlService {
           } else {
             // フォルダ
             final folderId = _uuid.v4();
-            await _db.foldersDao.insertFolder(FoldersCompanion.insert(
-              id: folderId,
-              name: title.isNotEmpty ? title : 'Untitled Folder',
-              parent: Value(parentFolderId),
-              order: Value(folderOrderBase++),
-              spaceId: Value(currentSpaceId),
-            ));
+            await _db.foldersDao.insertFolder(
+              FoldersCompanion.insert(
+                id: folderId,
+                name: title.isNotEmpty ? title : 'Untitled Folder',
+                parent: Value(parentFolderId),
+                order: Value(folderOrderBase++),
+                spaceId: Value(currentSpaceId),
+              ),
+            );
             folderCount++;
             await processOutlines(
               outline.findElements('outline'),
@@ -122,7 +132,10 @@ class OpmlService {
     });
 
     return OpmlImportResult(
-        feeds: feedCount, folders: folderCount, newFeedIds: newFeedIds);
+      feeds: feedCount,
+      folders: folderCount,
+      newFeedIds: newFeedIds,
+    );
   }
 
   // ── エクスポート ──────────────────────────────────────────────────────────
@@ -141,40 +154,60 @@ class OpmlService {
 
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
-    builder.element('opml', attributes: {'version': '2.0'}, nest: () {
-      builder.element('head', nest: () {
-        builder.element('title', nest: 'SweepRSS Export');
-      });
-      builder.element('body', nest: () {
-        for (final space in allSpaces) {
-          builder.element('outline', attributes: {
-            'text': space.name,
-            'title': space.name,
-            'sweepType': 'space',
-          }, nest: () {
-            final uncatFeeds = allFeeds
-                .where((f) => f.folderId == null && f.spaceId == space.id);
-            for (final feed in uncatFeeds) {
-              builder.element('outline', attributes: {
-                'type': 'rss',
-                'text': feed.title ?? feed.url,
-                'title': feed.title ?? feed.url,
-                'xmlUrl': feed.url,
-              });
+    builder.element(
+      'opml',
+      attributes: {'version': '2.0'},
+      nest: () {
+        builder.element(
+          'head',
+          nest: () {
+            builder.element('title', nest: 'SweepRSS Export');
+          },
+        );
+        builder.element(
+          'body',
+          nest: () {
+            for (final space in allSpaces) {
+              builder.element(
+                'outline',
+                attributes: {
+                  'text': space.name,
+                  'title': space.name,
+                  'sweepType': 'space',
+                },
+                nest: () {
+                  final uncatFeeds = allFeeds.where(
+                    (f) => f.folderId == null && f.spaceId == space.id,
+                  );
+                  for (final feed in uncatFeeds) {
+                    builder.element(
+                      'outline',
+                      attributes: {
+                        'type': 'rss',
+                        'text': feed.title ?? feed.url,
+                        'title': feed.title ?? feed.url,
+                        'xmlUrl': feed.url,
+                      },
+                    );
+                  }
+                  for (final folder in allFolders.where(
+                    (f) => f.parent == null && f.spaceId == space.id,
+                  )) {
+                    _buildFolderXml(builder, folder, allFolders, allFeeds);
+                  }
+                },
+              );
             }
-            for (final folder in allFolders
-                .where((f) => f.parent == null && f.spaceId == space.id)) {
+            // スペース未割り当てのトップレベルフォルダ（移行前データの安全網）
+            for (final folder in allFolders.where(
+              (f) => f.parent == null && f.spaceId == null,
+            )) {
               _buildFolderXml(builder, folder, allFolders, allFeeds);
             }
-          });
-        }
-        // スペース未割り当てのトップレベルフォルダ（移行前データの安全網）
-        for (final folder
-            in allFolders.where((f) => f.parent == null && f.spaceId == null)) {
-          _buildFolderXml(builder, folder, allFolders, allFeeds);
-        }
-      });
-    });
+          },
+        );
+      },
+    );
 
     return builder.buildDocument().toXmlString(pretty: true);
   }
@@ -187,32 +220,49 @@ class OpmlService {
     final spaceFolderIds = spaceFolders.map((f) => f.id).toSet();
 
     final spaceFeeds = allActiveFeeds
-        .where((f) =>
-            (f.folderId != null && spaceFolderIds.contains(f.folderId)) ||
-            (f.folderId == null && f.spaceId == spaceId))
+        .where(
+          (f) =>
+              (f.folderId != null && spaceFolderIds.contains(f.folderId)) ||
+              (f.folderId == null && f.spaceId == spaceId),
+        )
         .toList();
 
     final builder = XmlBuilder();
     builder.processing('xml', 'version="1.0" encoding="UTF-8"');
-    builder.element('opml', attributes: {'version': '2.0'}, nest: () {
-      builder.element('head', nest: () {
+    builder.element(
+      'opml',
+      attributes: {'version': '2.0'},
+      nest: () {
         builder.element(
-            'title', nest: 'SweepRSS Export - ${space?.name ?? ''}');
-      });
-      builder.element('body', nest: () {
-        for (final feed in spaceFeeds.where((f) => f.folderId == null)) {
-          builder.element('outline', attributes: {
-            'type': 'rss',
-            'text': feed.title ?? feed.url,
-            'title': feed.title ?? feed.url,
-            'xmlUrl': feed.url,
-          });
-        }
-        for (final folder in spaceFolders.where((f) => f.parent == null)) {
-          _buildFolderXml(builder, folder, spaceFolders, spaceFeeds);
-        }
-      });
-    });
+          'head',
+          nest: () {
+            builder.element(
+              'title',
+              nest: 'SweepRSS Export - ${space?.name ?? ''}',
+            );
+          },
+        );
+        builder.element(
+          'body',
+          nest: () {
+            for (final feed in spaceFeeds.where((f) => f.folderId == null)) {
+              builder.element(
+                'outline',
+                attributes: {
+                  'type': 'rss',
+                  'text': feed.title ?? feed.url,
+                  'title': feed.title ?? feed.url,
+                  'xmlUrl': feed.url,
+                },
+              );
+            }
+            for (final folder in spaceFolders.where((f) => f.parent == null)) {
+              _buildFolderXml(builder, folder, spaceFolders, spaceFeeds);
+            }
+          },
+        );
+      },
+    );
 
     return builder.buildDocument().toXmlString(pretty: true);
   }
@@ -227,45 +277,55 @@ class OpmlService {
     int depth = 0,
   }) {
     if (depth > _maxExportDepth) return;
-    builder.element('outline',
-        attributes: {'text': folder.name, 'title': folder.name}, nest: () {
-      final feedsInFolder = allFeeds.where((f) => f.folderId == folder.id);
-      for (final feed in feedsInFolder) {
-        builder.element('outline', attributes: {
-          'type': 'rss',
-          'text': feed.title ?? feed.url,
-          'title': feed.title ?? feed.url,
-          'xmlUrl': feed.url,
-        });
-      }
-      final subfolders = allFolders.where((f) => f.parent == folder.id);
-      for (final sub in subfolders) {
-        _buildFolderXml(builder, sub, allFolders, allFeeds, depth: depth + 1);
-      }
-    });
+    builder.element(
+      'outline',
+      attributes: {'text': folder.name, 'title': folder.name},
+      nest: () {
+        final feedsInFolder = allFeeds.where((f) => f.folderId == folder.id);
+        for (final feed in feedsInFolder) {
+          builder.element(
+            'outline',
+            attributes: {
+              'type': 'rss',
+              'text': feed.title ?? feed.url,
+              'title': feed.title ?? feed.url,
+              'xmlUrl': feed.url,
+            },
+          );
+        }
+        final subfolders = allFolders.where((f) => f.parent == folder.id);
+        for (final sub in subfolders) {
+          _buildFolderXml(builder, sub, allFolders, allFeeds, depth: depth + 1);
+        }
+      },
+    );
   }
 
   Future<void> exportAllSpacesToFile({required String dialogTitle}) async {
     final content = await exportAllSpacesToString();
-    final path = await FilePicker.platform.saveFile(
+    await FilePicker.saveFile(
       dialogTitle: dialogTitle,
       fileName: 'sweeprss_export_all.opml',
+      bytes: Uint8List.fromList(utf8.encode(content)),
     );
-    if (path != null) {
-      await File(path).writeAsString(content);
-    }
+    // if (path != null) {
+    //   await File(path).writeAsString(content);
+    // }
   }
 
-  Future<void> exportCurrentSpaceToFile(Space space,
-      {required String dialogTitle}) async {
+  Future<void> exportCurrentSpaceToFile(
+    Space space, {
+    required String dialogTitle,
+  }) async {
     final content = await exportCurrentSpaceToString(space.id);
-    final path = await FilePicker.platform.saveFile(
+    await FilePicker.saveFile(
       dialogTitle: dialogTitle,
       fileName: 'sweeprss_export_${_toSafeFilename(space.name)}.opml',
+      bytes: Uint8List.fromList(utf8.encode(content)),
     );
-    if (path != null) {
-      await File(path).writeAsString(content);
-    }
+    // if (path != null) {
+    //   await File(path).writeAsString(content);
+    // }
   }
 }
 
@@ -273,8 +333,11 @@ class OpmlImportResult {
   final int feeds;
   final int folders;
   final List<String> newFeedIds;
-  const OpmlImportResult(
-      {required this.feeds, required this.folders, required this.newFeedIds});
+  const OpmlImportResult({
+    required this.feeds,
+    required this.folders,
+    required this.newFeedIds,
+  });
 }
 
 class OpmlException implements Exception {
