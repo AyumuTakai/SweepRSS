@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.20.0
   uuid: ^4.5.1
   url_launcher: ^6.3.1
+  package_info_plus: ^10.1.0
 
 dependency_overrides:
   intl: ^0.20.0

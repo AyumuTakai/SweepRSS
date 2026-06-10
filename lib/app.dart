@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 
 import 'features/opml/opml_import_provider.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'shared/app_version.dart';
 import 'shared/providers/active_space_provider.dart';
 import 'shared/providers/refresh_provider.dart';
 import 'shared/widgets/adaptive_layout.dart';
@@ -126,7 +127,7 @@ class _AppShell extends ConsumerWidget {
                 onSelected: () => showAboutDialog(
                   context: context,
                   applicationName: 'SweepRSS',
-                  applicationVersion: '0.1.0',
+                  applicationVersion: AppVersion.version,
                 ),
               ),
               PlatformMenuItemGroup(members: [
@@ -331,7 +332,7 @@ class _WinLinuxMenuBar extends ConsumerWidget {
                         onPressed: () => showAboutDialog(
                           context: context,
                           applicationName: 'SweepRSS',
-                          applicationVersion: '0.1.0',
+                          applicationVersion: AppVersion.version,
                         ),
                         child: Text(l10n.menuAbout),
                       ),

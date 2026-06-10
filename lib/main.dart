@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'core/database/app_database.dart';
+import 'shared/app_version.dart';
 import 'shared/providers/database_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await AppVersion.init();
 
   final db = await AppDatabase.create();
 
