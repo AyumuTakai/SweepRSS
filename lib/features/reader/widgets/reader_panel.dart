@@ -137,15 +137,7 @@ class _UrlView extends ConsumerWidget {
         );
       },
       shouldOverrideUrlLoading: (controller, action) async {
-        // ユーザーが明示的にリンクをクリックした場合のみ外部ブラウザで開く。
-        // 自動リダイレクトや JS ナビゲーションは WebView 内で処理する。
-        if (action.navigationType == NavigationType.LINK_ACTIVATED) {
-          final dest = action.request.url;
-          if (dest != null && _isSafeUrl(dest.toString())) {
-            await launchUrl(dest.uriValue, mode: LaunchMode.externalApplication);
-          }
-          return NavigationActionPolicy.CANCEL;
-        }
+        // WebView 内でリンクを処理する（内部ブラウザで表示）
         return NavigationActionPolicy.ALLOW;
       },
     );
@@ -189,13 +181,15 @@ class _SummaryView extends ConsumerWidget {
       },
       shouldOverrideUrlLoading: (controller, action) async {
         final url = action.request.url?.toString() ?? '';
+        // data: URI と about:blank は通常通り許可
         if (url.startsWith('data:') || url == 'about:blank') {
           return NavigationActionPolicy.ALLOW;
         }
-        // http/https のみ外部ブラウザで開く（file: / javascript: 等を除外）
+        // http/https のリンクも WebView 内で処理（内部ブラウザで表示）
         if (_isSafeUrl(url)) {
-          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+          return NavigationActionPolicy.ALLOW;
         }
+        // その他のスキームは無視
         return NavigationActionPolicy.CANCEL;
       },
     );

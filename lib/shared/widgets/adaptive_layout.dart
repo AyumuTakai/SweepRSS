@@ -140,9 +140,9 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
     }
   }
 
-  // ── ↓キー: 次の未読記事 ────────────────────────────────────────────────────
+  // ── ↓キー: 次の記事（未読既読に係わらず） ────────────────────────────────
 
-  void _handleArrowDown() => _selectNextUnread();
+  void _handleArrowDown() => _selectNextArticle();
 
   // ── ↑キー: 前の記事 ────────────────────────────────────────────────────────
 
@@ -185,6 +185,27 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
         _selectArticle(articles[i], i);
         return;
       }
+    }
+  }
+
+  // ── 次の記事を選択（未読既読に係わらず） ────────────────────────────────────
+
+  void _selectNextArticle() {
+    final articlesAsync = ref.read(articlesProvider);
+    final articles = articlesAsync.when(
+      data: (data) => data,
+      loading: () => null,
+      error: (_, _) => null,
+    );
+    if (articles == null || articles.isEmpty) return;
+
+    final currentId = ref.read(currentArticleIdProvider);
+    final currentIndex = currentId == null
+        ? -1
+        : articles.indexWhere((a) => a.id == currentId);
+
+    if (currentIndex + 1 < articles.length) {
+      _selectArticle(articles[currentIndex + 1], currentIndex + 1);
     }
   }
 

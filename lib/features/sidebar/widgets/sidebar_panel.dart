@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
@@ -41,8 +42,16 @@ class SidebarPanel extends ConsumerWidget {
             _SidebarHeader(isRefreshing: refreshState.isRefreshing),
             const SpaceSwitcher(),
             Expanded(
-              child: ListView(
-                children: [
+              child: Focus(
+                onKey: (node, event) {
+                  // スペースキーを無視して、次のハンドラーに渡さない
+                  if (event.logicalKey == LogicalKeyboardKey.space) {
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: ListView(
+                  children: [
                   _NavItem(
                     icon: Icons.all_inbox,
                     label: AppLocalizations.of(context).navAll,
@@ -94,6 +103,7 @@ class SidebarPanel extends ConsumerWidget {
                   const Divider(height: 1),
                   const _TrashTile(),
                 ],
+                ),
               ),
             ),
             _ImportProgressBar(),
