@@ -14,9 +14,10 @@ import 'shared/providers/database_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  WebViewEnvironment? webViewEnvironment;
   if (Platform.isWindows) {
     final appDir = await getApplicationSupportDirectory();
-    await WebViewEnvironment.create(
+    webViewEnvironment = await WebViewEnvironment.create(
       settings: WebViewEnvironmentSettings(
         userDataFolder: p.join(appDir.path, 'WebView2'),
       ),
@@ -34,6 +35,7 @@ void main() async {
     ProviderScope(
       overrides: [
         databaseProvider.overrideWithValue(db),
+        webViewEnvironmentProvider.overrideWithValue(webViewEnvironment),
       ],
       child: const RssReaderApp(),
     ),

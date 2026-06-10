@@ -135,6 +135,7 @@ class _UrlView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return InAppWebView(
+      webViewEnvironment: ref.read(webViewEnvironmentProvider),
       initialUrlRequest: URLRequest(url: WebUri(url)),
       initialSettings: _webViewSettings,
       onWebViewCreated: (controller) {
@@ -175,6 +176,7 @@ class _SummaryView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return InAppWebView(
+      webViewEnvironment: ref.read(webViewEnvironmentProvider),
       initialUrlRequest: URLRequest(url: WebUri(_buildDataUri())),
       initialSettings: _summaryViewSettings,
       onWebViewCreated: (controller) {
