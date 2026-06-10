@@ -2,7 +2,7 @@ name: sweeprss
 description: "SweepRSS - cross-platform RSS reader"
 publish_to: 'none'
 
-version: 0.3.1+1
+version: 0.3.3+1
 
 environment:
   sdk: ^3.12.1

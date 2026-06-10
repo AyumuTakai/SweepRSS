@@ -144,21 +144,33 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
 
   void _handleArrowDown() => _selectNextArticle();
 
-  // ── ↑キー: 前の記事 ────────────────────────────────────────────────────────
+  // ── 記事一覧を取得 ────────────────────────────────────────────────────────
 
-  void _handleArrowUp() {
+  List<Entry>? _getArticles() {
     final articlesAsync = ref.read(articlesProvider);
-    final articles = articlesAsync.when(
+    return articlesAsync.when(
       data: (data) => data,
       loading: () => null,
       error: (_, _) => null,
     );
+  }
+
+  int _getCurrentArticleIndex() {
+    final articles = _getArticles();
+    if (articles == null) return -1;
+    final currentId = ref.read(currentArticleIdProvider);
+    return currentId == null
+        ? -1
+        : articles.indexWhere((a) => a.id == currentId);
+  }
+
+  // ── ↑キー: 前の記事 ────────────────────────────────────────────────────────
+
+  void _handleArrowUp() {
+    final articles = _getArticles();
     if (articles == null || articles.isEmpty) return;
 
-    final currentId = ref.read(currentArticleIdProvider);
-    if (currentId == null) return;
-
-    final currentIndex = articles.indexWhere((a) => a.id == currentId);
+    final currentIndex = _getCurrentArticleIndex();
     if (currentIndex <= 0) return;
 
     _selectArticle(articles[currentIndex - 1], currentIndex - 1);
@@ -167,19 +179,10 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   // ── 次の未読記事を選択 ─────────────────────────────────────────────────────
 
   void _selectNextUnread() {
-    final articlesAsync = ref.read(articlesProvider);
-    final articles = articlesAsync.when(
-      data: (data) => data,
-      loading: () => null,
-      error: (_, _) => null,
-    );
+    final articles = _getArticles();
     if (articles == null || articles.isEmpty) return;
 
-    final currentId = ref.read(currentArticleIdProvider);
-    final currentIndex = currentId == null
-        ? -1
-        : articles.indexWhere((a) => a.id == currentId);
-
+    final currentIndex = _getCurrentArticleIndex();
     for (int i = currentIndex + 1; i < articles.length; i++) {
       if (articles[i].unread) {
         _selectArticle(articles[i], i);
@@ -191,19 +194,10 @@ class _AdaptiveLayoutState extends ConsumerState<AdaptiveLayout> {
   // ── 次の記事を選択（未読既読に係わらず） ────────────────────────────────────
 
   void _selectNextArticle() {
-    final articlesAsync = ref.read(articlesProvider);
-    final articles = articlesAsync.when(
-      data: (data) => data,
-      loading: () => null,
-      error: (_, _) => null,
-    );
+    final articles = _getArticles();
     if (articles == null || articles.isEmpty) return;
 
-    final currentId = ref.read(currentArticleIdProvider);
-    final currentIndex = currentId == null
-        ? -1
-        : articles.indexWhere((a) => a.id == currentId);
-
+    final currentIndex = _getCurrentArticleIndex();
     if (currentIndex + 1 < articles.length) {
       _selectArticle(articles[currentIndex + 1], currentIndex + 1);
     }

@@ -12,6 +12,21 @@ import '../../../shared/providers/reader_controller_provider.dart';
 import '../../../shared/providers/selection_provider.dart';
 import '../../articles/providers/articles_provider.dart';
 
+// WebView 設定
+final _webViewSettings = InAppWebViewSettings(
+  javaScriptEnabled: true,
+  useShouldOverrideUrlLoading: true,
+  mediaPlaybackRequiresUserGesture: true,
+);
+
+final _summaryViewSettings = InAppWebViewSettings(
+  javaScriptEnabled: false,
+  allowFileAccess: false,
+  useShouldOverrideUrlLoading: true,
+  mediaPlaybackRequiresUserGesture: true,
+  transparentBackground: false,
+);
+
 class ReaderPanel extends ConsumerWidget {
   const ReaderPanel({super.key});
 
@@ -121,11 +136,7 @@ class _UrlView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return InAppWebView(
       initialUrlRequest: URLRequest(url: WebUri(url)),
-      initialSettings: InAppWebViewSettings(
-        javaScriptEnabled: true,
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: true,
-      ),
+      initialSettings: _webViewSettings,
       onWebViewCreated: (controller) {
         ref.read(readerWebViewControllerProvider.notifier).state = controller;
       },
@@ -165,13 +176,7 @@ class _SummaryView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return InAppWebView(
       initialUrlRequest: URLRequest(url: WebUri(_buildDataUri())),
-      initialSettings: InAppWebViewSettings(
-        javaScriptEnabled: false,
-        allowFileAccess: false,
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: true,
-        transparentBackground: false,
-      ),
+      initialSettings: _summaryViewSettings,
       onWebViewCreated: (controller) {
         ref.read(readerWebViewControllerProvider.notifier).state = controller;
       },
