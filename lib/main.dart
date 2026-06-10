@@ -1,5 +1,10 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 import 'app.dart';
 import 'core/database/app_database.dart';
@@ -8,6 +13,15 @@ import 'shared/providers/database_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows) {
+    final appDir = await getApplicationSupportDirectory();
+    await WebViewEnvironment.create(
+      settings: WebViewEnvironmentSettings(
+        userDataFolder: p.join(appDir.path, 'WebView2'),
+      ),
+    );
+  }
 
   await AppVersion.init();
 

@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 import 'features/opml/opml_import_provider.dart';
+import 'shared/providers/database_provider.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'shared/app_version.dart';
 import 'shared/providers/active_space_provider.dart';
@@ -100,6 +101,7 @@ class _AppShell extends ConsumerWidget {
 
       if (confirmed == true) {
         try {
+          await ref.read(databaseProvider).close();
           final dir = await getApplicationSupportDirectory();
           final dbFile = File(p.join(dir.path, 'sweeprss.db'));
           if (await dbFile.exists()) {
@@ -288,6 +290,7 @@ class _WinLinuxMenuBar extends ConsumerWidget {
 
       if (confirmed == true) {
         try {
+          await ref.read(databaseProvider).close();
           final dir = await getApplicationSupportDirectory();
           final dbFile = File(p.join(dir.path, 'sweeprss.db'));
           if (await dbFile.exists()) {
