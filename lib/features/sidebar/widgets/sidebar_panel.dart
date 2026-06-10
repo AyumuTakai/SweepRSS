@@ -43,7 +43,7 @@ class SidebarPanel extends ConsumerWidget {
             const SpaceSwitcher(),
             Expanded(
               child: Focus(
-                onKey: (node, event) {
+                onKeyEvent: (node, event) {
                   // スペースキーを無視して、次のハンドラーに渡さない
                   if (event.logicalKey == LogicalKeyboardKey.space) {
                     return KeyEventResult.handled;
@@ -217,36 +217,6 @@ class _ImportProgressBar extends ConsumerWidget {
       default:
         return '';
     }
-  }
-}
-
-class _SidebarFooter extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.add, size: 18),
-            tooltip: AppLocalizations.of(context).sidebarAddFeedTooltip,
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => const AddFeedDialog(),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.create_new_folder_outlined, size: 18),
-            tooltip: AppLocalizations.of(context).sidebarManageFoldersTooltip,
-            onPressed: () => showDialog(
-              context: context,
-              builder: (_) => const FolderManagerDialog(),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

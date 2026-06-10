@@ -227,7 +227,6 @@ class _ArticleTile extends ConsumerWidget {
 
   void _showContextMenu(
       BuildContext context, WidgetRef ref, Offset position) {
-    final l10n = AppLocalizations.of(context);
     showMenu(
       context: context,
       position: RelativeRect.fromLTRB(
